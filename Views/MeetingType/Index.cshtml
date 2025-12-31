@@ -1,0 +1,190 @@
+@model List<MeetingType>
+
+@{
+    ViewData["Title"] = "Meeting Types Management";
+}
+
+<div class="pagetitle">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Meeting Types</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Meeting Types</li>
+                </ol>
+            </nav>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i> Add New Type
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="animation: slideInDown 0.5s ease-out;">
+        <i class="bi bi-check-circle me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<section class="section">
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Types</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); color: #667eea;">
+                            <i class="bi bi-tags fs-5"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 class="mb-0" style="font-size: 2rem; font-weight: 700;">@Model.Count</h6>
+                            <span class="text-muted small">All meeting types</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title">Active Types</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%); color: #11998e;">
+                            <i class="bi bi-check-circle fs-5"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 class="mb-0" style="font-size: 2rem; font-weight: 700;">@Model.Count(m => m.IsActive)</h6>
+                            <span class="text-muted small">In use</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title">Inactive Types</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: linear-gradient(135deg, rgba(245, 87, 108, 0.1) 0%, rgba(250, 112, 154, 0.1) 100%); color: #f5576c;">
+                            <i class="bi bi-exclamation-circle fs-5"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 class="mb-0" style="font-size: 2rem; font-weight: 700;">@Model.Count(m => !m.IsActive)</h6>
+                            <span class="text-muted small">Archived</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="card">
+        <div class="card-body pt-4">
+            <h5 class="card-title mb-4">All Meeting Types</h5>
+
+            @if (Model.Count == 0)
+            {
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No meeting types found. <a asp-action="Create">Create one</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Type Name</th>
+                                <th scope="col">Code</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Created Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.Name</strong></td>
+                                    <td><span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">@item.Code</span></td>
+                                    <td><small>@(item.Description?.Length > 40 ? item.Description.Substring(0, 40) + "..." : item.Description)</small></td>
+                                    <td>@item.DefaultDuration <small>min</small></td>
+                                    <td><small>@item.CreatedDate.ToString("MMM dd, yyyy")</small></td>
+                                    <td>
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white;">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger" title="Delete" onclick="confirmDelete(@item.Id, '@item.Name')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Are you sure you want to delete <strong><span id="typeName"></span></strong>?</p>
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Type</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('typeName').textContent = name;
+            var form = document.getElementById('deleteForm');
+            form.action = '@Url.Action("Delete", "MeetingType")/' + id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}

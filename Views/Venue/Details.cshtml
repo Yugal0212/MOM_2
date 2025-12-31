@@ -1,0 +1,401 @@
+@model Venue
+
+@{
+    ViewData["Title"] = "Venue Details";
+}
+
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .details-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .venue-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-text .type-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .info-card-modern {
+        background: white;
+        border-radius: 16px;
+        padding: 1.8rem;
+        height: 100%;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .info-card-modern .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-card-modern .label {
+        font-size: 0.875rem;
+        color: #8b92a7;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card-modern .value {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 80%;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-modern {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-modern.btn-back {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-modern.btn-edit {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .btn-modern.btn-delete {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+
+    .equipment-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    .equipment-tag {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        .hero-text h1 { font-size: 1.8rem; }
+        .action-buttons { flex-direction: column; }
+        .btn-modern { width: 100%; }
+    }
+</style>
+
+<div class="pagetitle">
+    <h1>Meeting Venue Details</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Venue")">Venues</a></li>
+            <li class="breadcrumb-item active">Details</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Hero Section -->
+            <div class="details-hero">
+                <div class="hero-content">
+                    <div class="venue-icon">
+                        @if (Model.VenueType == "Physical")
+                        {
+                            <i class="bi bi-building"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-broadcast"></i>
+                        }
+                    </div>
+                    <div class="hero-text">
+                        <h1>@Model.Name</h1>
+                        <span class="type-badge">
+                            <i class="bi @(Model.VenueType == "Physical" ? "bi-geo-alt" : "bi-broadcast") me-2"></i>
+                            @Model.VenueType Venue
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="section-title">Venue Information</div>
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <div class="label">Location</div>
+                        <h3 class="value" style="font-size: 1.1rem;">@Model.Location</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="label">Capacity</div>
+                        <h3 class="value">@(Model.VenueType == "Virtual" ? "Unlimited" : Model.Capacity + " persons")</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="label">Building</div>
+                        <h3 class="value" style="font-size: 1.1rem;">@(Model.Building ?? "N/A")</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-door-closed"></i>
+                        </div>
+                        <div class="label">Room Number</div>
+                        <h3 class="value" style="font-size: 1.1rem;">@(Model.RoomNumber ?? "N/A")</h3>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.VenueType == "Virtual" && !string.IsNullOrEmpty(Model.MeetingLink))
+            {
+                <div class="section-title">Virtual Meeting Details</div>
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-8">
+                        <div class="info-card-modern">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <div class="label">Meeting Link</div>
+                            <p style="margin-bottom: 1rem;">
+                                <a href="@Model.MeetingLink" target="_blank" rel="noopener noreferrer">
+                                    @Model.MeetingLink
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Equipment))
+            {
+                <div class="section-title">Equipment & Facilities</div>
+                <div class="row mb-4">
+                    <div class="col-lg-12">
+                        <div class="equipment-list">
+                            @foreach (var equipment in Model.Equipment.Split(','))
+                            {
+                                <span class="equipment-tag">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    @equipment.Trim()
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Status -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="label">Status</div>
+                        <h3 class="value">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Inactive</span>
+                            }
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="@Url.Action("Index", "Venue")" class="btn-modern btn-back">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+                <a href="@Url.Action("Edit", "Venue", new { id = Model.Id })" class="btn-modern btn-edit">
+                    <i class="bi bi-pencil me-2"></i> Edit Venue
+                </a>
+                <button type="button" class="btn-modern btn-delete" onclick="confirmDelete(@Model.Id, '@Model.Name')">
+                    <i class="bi bi-trash me-2"></i> Delete Venue
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong><span id="venueName"></span></strong>?
+                <br />
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('venueName').textContent = name;
+            var form = document.getElementById('deleteForm');
+            form.action = '@Url.Action("Delete", "Venue")/' + id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}

@@ -1,0 +1,204 @@
+@model IEnumerable<MOM.Models.Department>
+
+@{
+    ViewData["Title"] = "Departments Management";
+}
+
+<div class="pagetitle">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Departments</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Departments</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="@Url.Action("Create", "Department")" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i> Add New Department
+        </a>
+    </div>
+</div><!-- End Page Title -->
+
+<section class="section dashboard">
+    <div class="row">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="col-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Success!</strong> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        <!-- Stats Cards -->
+        <div class="col-xxl-3 col-md-6">
+            <div class="card info-card sales-card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Departments</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6>6</h6>
+                            <span class="text-success small pt-1 fw-bold">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-3 col-md-6">
+            <div class="card info-card revenue-card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Staff</h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6>45</h6>
+                            <span class="text-info small pt-1 fw-bold">Members</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body pt-4">
+                    <h5 class="card-title mb-4">Department Directory</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover datatable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Manager</th>
+                                    <th scope="col">Members</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Created Date</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var department in Model)
+                                    {
+                                        <tr>
+                                            <td>@department.Id</td>
+                                            <td><strong>@department.Name</strong></td>
+                                            <td>@department.Manager</td>
+                                            <td>
+                                                <span class="badge bg-info">@department.EmployeeCount</span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(department.Description) && department.Description.Length > 50)
+                                                {
+                                                    @department.Description.Substring(0, 50)<text>...</text>
+                                                }
+                                                else
+                                                {
+                                                    @department.Description
+                                                }
+                                            </td>
+                                            <td>@department.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (department.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Inactive</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="@Url.Action("Details", "Department", new { id = department.Id })" 
+                                                       class="btn btn-outline-info" 
+                                                       title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "Department", new { id = department.Id })" 
+                                                       class="btn btn-outline-primary" 
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger" 
+                                                            onclick="confirmDelete(@department.Id, '@department.Name')"
+                                                            title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center">
+                                            <div class="alert alert-info mb-0" role="alert">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                No departments found. Click "Add New Department" to create one.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to delete the department <strong><span id="departmentName"></span></strong>?</p>
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Department</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('departmentName').textContent = name;
+            var form = document.getElementById('deleteForm');
+            form.action = '@Url.Action("Delete", "Department")/' + id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
