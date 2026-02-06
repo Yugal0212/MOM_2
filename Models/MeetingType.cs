@@ -1,31 +1,25 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MOM.Models
 {
+    [Table("MOM_MeetingType")]
     public class MeetingType
     {
-        public int Id { get; set; }
+        [Key]
+        public int MeetingTypeId { get; set; }
 
         [Required]
-        [Display(Name = "Type Name")]
-        public string Name { get; set; } = string.Empty;
+        [StringLength(100)]
+        public string MeetingTypeName { get; set; }
 
         [Required]
-        [Display(Name = "Type Code")]
-        public string Code { get; set; } = string.Empty;
+        [StringLength(100)]
+        public string Remarks { get; set; }
 
-        [Display(Name = "Description")]
-        public string Description { get; set; } = string.Empty;
+        public DateTime Created { get; set; } = DateTime.Now;
 
-        [Display(Name = "Default Duration (minutes)")]
-        public int DefaultDuration { get; set; } = 60;
-
-        [Display(Name = "Created Date")]
-        [DataType(DataType.Date)]
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-
-        [Display(Name = "Is Active")]
-        public bool IsActive { get; set; } = true;
+        public DateTime Modified { get; set; } = DateTime.Now;
     }
 }

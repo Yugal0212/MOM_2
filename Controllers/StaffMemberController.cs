@@ -1,109 +1,300 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using MOM.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace MOM.Controllers
 {
+    [Authorize]
     public class StaffMemberController : Controller
     {
-        private static List<StaffMember> _staffMembers = new List<StaffMember>
-        {
-            new StaffMember { Id = 1, FirstName = "John", LastName = "Smith", Email = "john.smith@company.com", Phone = "+1(555)123-4567", Department = "Human Resources", Position = "HR Manager", EmployeeId = "EMP001", JoinedDate = new DateTime(2020, 3, 15), IsActive = true },
-            new StaffMember { Id = 2, FirstName = "Sarah", LastName = "Johnson", Email = "sarah.johnson@company.com", Phone = "+1(555)123-4568", Department = "Information Technology", Position = "IT Director", EmployeeId = "EMP002", JoinedDate = new DateTime(2019, 6, 20), IsActive = true },
-            new StaffMember { Id = 3, FirstName = "Michael", LastName = "Brown", Email = "michael.brown@company.com", Phone = "+1(555)123-4569", Department = "Finance", Position = "Finance Manager", EmployeeId = "EMP003", JoinedDate = new DateTime(2018, 8, 10), IsActive = true },
-            new StaffMember { Id = 4, FirstName = "Emily", LastName = "Davis", Email = "emily.davis@company.com", Phone = "+1(555)123-4570", Department = "Marketing", Position = "Marketing Manager", EmployeeId = "EMP004", JoinedDate = new DateTime(2021, 4, 5), IsActive = true },
-            new StaffMember { Id = 5, FirstName = "David", LastName = "Wilson", Email = "david.wilson@company.com", Phone = "+1(555)123-4571", Department = "Operations", Position = "Operations Lead", EmployeeId = "EMP005", JoinedDate = new DateTime(2017, 9, 12), IsActive = true },
-            new StaffMember { Id = 6, FirstName = "Jessica", LastName = "Martinez", Email = "jessica.martinez@company.com", Phone = "+1(555)123-4572", Department = "Sales", Position = "Sales Director", EmployeeId = "EMP006", JoinedDate = new DateTime(2020, 1, 8), IsActive = true }
-        };
+        private readonly IConfiguration _configuration;
 
-        public IActionResult Index()
+        public StaffMemberController(IConfiguration configuration)
         {
-            return View(_staffMembers.OrderBy(s => s.LastName).ToList());
+            _configuration = configuration;
+        }
+
+        public static List<Staff> _staffMembers = new List<Staff>();
+
+        public IActionResult Index(string searchTerm, int? departmentId)
+        {
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_Staff_GetAll";
+                
+                SqlDataReader reader = command.ExecuteReader();
+                DataTable table = new DataTable();
+                table.Load(reader);
+                reader.Close();
+                
+                // Get departments for dropdown
+                SqlCommand deptCmd = connection.CreateCommand();
+                deptCmd.CommandType = CommandType.StoredProcedure;
+                deptCmd.CommandText = "SP_Department_GetAll";
+                SqlDataReader deptReader = deptCmd.ExecuteReader();
+                DataTable deptTable = new DataTable();
+                deptTable.Load(deptReader);
+                deptReader.Close();
+                connection.Close();
+
+                // Create SelectList - ensure we have data
+                if (deptTable.Rows.Count > 0)
+                {
+                    var departmentList = new List<SelectListItem>();
+                    foreach (DataRow row in deptTable.Rows)
+                    {
+                        departmentList.Add(new SelectListItem
+                        {
+                            Value = row["DepartmentID"].ToString(),
+                            Text = row["DepartmentName"].ToString()
+                        });
+                    }
+                    ViewBag.Departments = new SelectList(departmentList, "Value", "Text");
+                }
+                else
+                {
+                    ViewBag.Departments = new SelectList(new List<SelectListItem>());
+                }
+                
+                ViewBag.CurrentSearch = searchTerm;
+                ViewBag.CurrentDepartmentId = departmentId;
+                
+                return View(table);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading staff: {ex.Message}";
+                return View(new DataTable());
+            }
         }
 
         public IActionResult Create()
         {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            
+            SqlCommand command = connection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_Department_GetAll";
+            
+            SqlDataReader reader = command.ExecuteReader();
+            DataTable table = new DataTable();
+            table.Load(reader);
+            connection.Close();
+            
+            ViewBag.Departments = new SelectList(table.Rows.Cast<DataRow>(), "DepartmentID", "DepartmentName");
             return View();
         }
 
         [HttpPost]
-        public IActionResult Create(StaffMember staffMember)
+        public IActionResult Create(Staff staff)
         {
             if (ModelState.IsValid)
             {
-                staffMember.Id = _staffMembers.Any() ? _staffMembers.Max(s => s.Id) + 1 : 1;
-                if (staffMember.JoinedDate == default)
-                {
-                    staffMember.JoinedDate = DateTime.Now;
-                }
-                _staffMembers.Add(staffMember);
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_Staff_Create";
+                command.Parameters.AddWithValue("@DepartmentID", staff.DepartmentId);
+                command.Parameters.AddWithValue("@StaffName", staff.StaffName);
+                command.Parameters.AddWithValue("@MobileNo", staff.MobileNo);
+                command.Parameters.AddWithValue("@EmailAddress", staff.EmailAddress);
+                command.Parameters.AddWithValue("@Remarks", staff.Remarks ?? (object)DBNull.Value);
+                
+                command.ExecuteNonQuery();
+                connection.Close();
+                
                 TempData["Success"] = "Staff Member added successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            return View(staffMember);
+            
+            string connString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection conn = new SqlConnection(connString);
+            conn.Open();
+            
+            SqlCommand cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SP_Department_GetAll";
+            
+            SqlDataReader rdr = cmd.ExecuteReader();
+            DataTable tbl = new DataTable();
+            tbl.Load(rdr);
+            conn.Close();
+            
+            ViewBag.Departments = new SelectList(tbl.Rows.Cast<DataRow>(), "DepartmentID", "DepartmentName", staff.DepartmentId);
+            return View(staff);
         }
 
         public IActionResult Edit(int id)
         {
-            var staffMember = _staffMembers.FirstOrDefault(s => s.Id == id);
-            if (staffMember == null)
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            
+            SqlCommand command = connection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_Staff_GetByID";
+            command.Parameters.AddWithValue("@StaffID", id);
+            
+            SqlDataReader reader = command.ExecuteReader();
+            DataTable table = new DataTable();
+            table.Load(reader);
+            reader.Close();
+            
+            if (table.Rows.Count == 0)
             {
+                connection.Close();
                 return NotFound();
             }
-            return View(staffMember);
+            
+            DataRow row = table.Rows[0];
+            Staff staff = new Staff
+            {
+                StaffId = Convert.ToInt32(row["StaffID"]),
+                DepartmentId = Convert.ToInt32(row["DepartmentID"]),
+                StaffName = row["StaffName"].ToString(),
+                MobileNo = row["MobileNo"].ToString(),
+                EmailAddress = row["EmailAddress"].ToString(),
+                Remarks = row["Remarks"] != DBNull.Value ? row["Remarks"].ToString() : null
+            };
+            
+            SqlCommand deptCmd = connection.CreateCommand();
+            deptCmd.CommandType = CommandType.StoredProcedure;
+            deptCmd.CommandText = "sp_Department_GetAll";
+            SqlDataReader deptReader = deptCmd.ExecuteReader();
+            DataTable deptTable = new DataTable();
+            deptTable.Load(deptReader);
+            connection.Close();
+            
+            ViewBag.Departments = new SelectList(deptTable.Rows.Cast<DataRow>(), "DepartmentID", "DepartmentName", staff.DepartmentId);
+            return View(staff);
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, StaffMember staffMember)
+        public IActionResult Edit(int id, Staff staff)
         {
-            if (id != staffMember.Id)
+            if (id != staff.StaffId)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                var existing = _staffMembers.FirstOrDefault(s => s.Id == id);
-                if (existing != null)
-                {
-                    existing.FirstName = staffMember.FirstName;
-                    existing.LastName = staffMember.LastName;
-                    existing.Email = staffMember.Email;
-                    existing.Phone = staffMember.Phone;
-                    existing.Department = staffMember.Department;
-                    existing.Position = staffMember.Position;
-                    existing.EmployeeId = staffMember.EmployeeId;
-                    existing.IsActive = staffMember.IsActive;
-                    
-                    TempData["Success"] = "Staff Member updated successfully!";
-                    return RedirectToAction(nameof(Index));
-                }
-                return NotFound();
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_Staff_Update";
+                command.Parameters.AddWithValue("@StaffID", staff.StaffId);
+                command.Parameters.AddWithValue("@DepartmentID", staff.DepartmentId);
+                command.Parameters.AddWithValue("@StaffName", staff.StaffName);
+                command.Parameters.AddWithValue("@MobileNo", staff.MobileNo);
+                command.Parameters.AddWithValue("@EmailAddress", staff.EmailAddress);
+                command.Parameters.AddWithValue("@Remarks", staff.Remarks ?? (object)DBNull.Value);
+                
+                command.ExecuteNonQuery();
+                connection.Close();
+                
+                TempData["Success"] = "Staff Member updated successfully!";
+                return RedirectToAction(nameof(Index));
             }
-            return View(staffMember);
+            
+            string connString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection conn = new SqlConnection(connString);
+            conn.Open();
+            
+            SqlCommand cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SP_Department_GetAll";
+            
+            SqlDataReader rdr = cmd.ExecuteReader();
+            DataTable tbl = new DataTable();
+            tbl.Load(rdr);
+            conn.Close();
+            
+            ViewBag.Departments = new SelectList(tbl.Rows.Cast<DataRow>(), "DepartmentID", "DepartmentName", staff.DepartmentId);
+            return View(staff);
         }
 
         public IActionResult Details(int id)
         {
-            var staffMember = _staffMembers.FirstOrDefault(s => s.Id == id);
-            if (staffMember == null)
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            
+            SqlCommand command = connection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_Staff_GetByID";
+            command.Parameters.AddWithValue("@StaffID", id);
+            
+            SqlDataReader reader = command.ExecuteReader();
+            DataTable table = new DataTable();
+            table.Load(reader);
+            connection.Close();
+            
+            if (table.Rows.Count == 0)
             {
                 return NotFound();
             }
-            return View(staffMember);
+            
+            DataRow row = table.Rows[0];
+            Staff staff = new Staff
+            {
+                StaffId = Convert.ToInt32(row["StaffID"]),
+                DepartmentId = Convert.ToInt32(row["DepartmentID"]),
+                StaffName = row["StaffName"].ToString(),
+                MobileNo = row["MobileNo"].ToString(),
+                EmailAddress = row["EmailAddress"].ToString(),
+                Remarks = row["Remarks"] != DBNull.Value ? row["Remarks"].ToString() : null
+            };
+            
+            ViewBag.DepartmentName = row["DepartmentName"].ToString();
+            
+            return View(staff);
         }
 
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var staffMember = _staffMembers.FirstOrDefault(s => s.Id == id);
-            if (staffMember != null)
+            try 
             {
-                _staffMembers.Remove(staffMember);
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_Staff_Delete";
+                command.Parameters.AddWithValue("@StaffID", id);
+                
+                command.ExecuteNonQuery();
+                connection.Close();
+                
                 TempData["Success"] = "Staff Member deleted successfully!";
             }
+            catch(SqlException)
+            {
+                TempData["Error"] = "Cannot delete staff member as they are likely associated with meetings.";
+            }
+            
             return RedirectToAction(nameof(Index));
         }
     }

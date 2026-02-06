@@ -1,966 +1,870 @@
+@using System.Linq
 @{
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="pagetitle">
-    <h1>Dashboard</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Dashboard</li>
-        </ol>
-    </nav>
-</div><!-- End Page Title -->
+<style>
+    /* Modern Dashboard Animations & Styles */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-<section class="section dashboard">
-    <div class="row">
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
 
-        <!-- Meeting Types Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card sales-card">
-                <div class="card-body">
-                    <h5 class="card-title">Meeting Types <span>| Active</span></h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-tags"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>6</h6>
-                            <span class="text-success small pt-1 fw-bold">3 types</span> <span class="text-muted small pt-2 ps-1">in use</span>
-                        </div>
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @@keyframes shimmer {
+        0% {
+            background-position: -1000px 0;
+        }
+        100% {
+            background-position: 1000px 0;
+        }
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .dashboard-wrapper {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .welcome-section {
+        animation: fadeInUp 0.8s ease-out;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        border: none;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    }
+
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    .stats-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.8rem;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .stats-card:nth-child(1) { animation-delay: 0.1s; }
+    .stats-card:nth-child(2) { animation-delay: 0.2s; }
+    .stats-card:nth-child(3) { animation-delay: 0.3s; }
+    .stats-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .stats-card:hover::before {
+        left: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+    }
+
+    .stats-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .stats-card:hover .stats-icon {
+        transform: rotate(360deg) scale(1.1);
+        animation: pulse 1s infinite;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0.5rem 0;
+    }
+
+    .stats-label {
+        font-size: 0.95rem;
+        color: #7f8c8d;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stats-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .badge-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .content-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeInUp 0.8s ease-out backwards;
+        animation-delay: 0.5s;
+        transition: all 0.3s ease;
+    }
+
+    .content-card:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        transform: translateY(-5px);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-title i {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .meeting-item {
+        padding: 1.25rem;
+        border-radius: 15px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        border: 2px solid #f0f0f0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .meeting-item::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 0.4s ease;
+    }
+
+    .meeting-item:hover::after {
+        width: 100%;
+    }
+
+    .meeting-item:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-color: #667eea;
+        transform: translateX(5px);
+    }
+
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-scheduled {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .quick-action-btn {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 15px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .quick-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .quick-action-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-success-gradient {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .btn-info-gradient {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .btn-warning-gradient {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+
+    .quick-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 1.5rem;
+    }
+
+    .activity-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    .activity-high {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .activity-medium {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 10px;
+        background: #e0e0e0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transition: width 1.5s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @@media (max-width: 768px) {
+        .welcome-title {
+            font-size: 1.8rem;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+        }
+    }
+
+    /* Floating Animation for Icons */
+    .float-animation {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    /* Gradient Text */
+    .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Chart Styles */
+    .chart-wrapper {
+        position: relative;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        margin-top: 1rem;
+    }
+
+    .chart-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .chart-label {
+        min-width: 80px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .chart-bar-container {
+        flex: 1;
+        height: 30px;
+        background: #e9ecef;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 0 1rem;
+        position: relative;
+    }
+
+    .chart-bar-fill {
+        height: 100%;
+        border-radius: 15px;
+        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .chart-bar-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .chart-value {
+        min-width: 40px;
+        text-align: right;
+        font-weight: 700;
+        color: #495057;
+    }
+
+    .chart-legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+    }
+
+    .legend-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="welcome-title">
+                        <i class="bi bi-emoji-smile float-animation"></i>
+                        Welcome to MOM Dashboard
+                    </h1>
+                    <p class="welcome-subtitle">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Today is <strong>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</strong> | 
+                        <i class="bi bi-clock ms-3 me-2"></i>
+                        <span id="currentTime"></span>
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="activity-indicator activity-high"></div>
+                    <span style="color: white; font-weight: 600;">System Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="stats-number">@Model.TotalMeetings.Total</div>
+                    <div class="stats-label">Total Meetings</div>
+                    <div class="stats-badge badge-success">
+                        <i class="bi bi-arrow-up"></i> @Model.TotalMeetings.ThisMonth this month
+                    </div>
+                    <div class="progress-bar-custom mt-3">
+                        <div class="progress-fill" style="width: 75%"></div>
                     </div>
                 </div>
             </div>
-        </div><!-- End Meeting Types Card -->
 
-        <!-- Staff Members Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card revenue-card">
-                <div class="card-body">
-                    <h5 class="card-title">Staff Members <span>| Total</span></h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>45</h6>
-                            <span class="text-success small pt-1 fw-bold">6 teams</span> <span class="text-muted small pt-2 ps-1">departments</span>
-                        </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stats-number">@Model.ActiveStaff.Total</div>
+                    <div class="stats-label">Active Staff</div>
+                    <div class="stats-badge badge-info">
+                        <i class="bi bi-graph-up"></i> @Model.ActiveStaff.AttendanceRate% attendance
+                    </div>
+                    <div class="progress-bar-custom mt-3">
+                        <div class="progress-fill" style="width: 94%"></div>
                     </div>
                 </div>
             </div>
-        </div><!-- End Staff Members Card -->
 
-        <!-- Meeting Venues Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card customers-card">
-                <div class="card-body">
-                    <h5 class="card-title">Meeting Venues <span>| Available</span></h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-building"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>8</h6>
-                            <span class="text-success small pt-1 fw-bold">6 physical</span> <span class="text-muted small pt-2 ps-1">+ 2 virtual</span>
-                        </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div class="stats-number">@Model.Venues.Total</div>
+                    <div class="stats-label">Venues</div>
+                    <div class="stats-badge badge-success">
+                        <i class="bi bi-check-circle"></i> @Model.Venues.Utilization% utilization
+                    </div>
+                    <div class="progress-bar-custom mt-3">
+                        <div class="progress-fill" style="width: 78%"></div>
                     </div>
                 </div>
             </div>
-        </div><!-- End Venues Card -->
 
-        <!-- Departments Card -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card customers-card">
-                <div class="card-body">
-                    <h5 class="card-title">Departments <span>| Organized</span></h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-diagram-3"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>8</h6>
-                            <span class="text-success small pt-1 fw-bold">7 active</span> <span class="text-muted small pt-2 ps-1">1 archived</span>
-                        </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="bi bi-tags-fill"></i>
+                    </div>
+                    <div class="stats-number">@Model.MeetingTypes.Total</div>
+                    <div class="stats-label">Meeting Types</div>
+                    <div class="stats-badge badge-info">
+                        <i class="bi bi-plus-circle"></i> @Model.MeetingTypes.Active active
+                    </div>
+                    <div class="progress-bar-custom mt-3">
+                        <div class="progress-fill" style="width: 87%"></div>
                     </div>
                 </div>
             </div>
-        </div><!-- End Departments Card -->
+        </div>
 
-        <!-- Left side columns -->
-        <div class="col-lg-8">
-            <div class="row">
+        <!-- Main Content Row -->
+        <div class="row g-4 mb-4">
+            <!-- Recent Meetings Section -->
+            <div class="col-xl-8 col-12">
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-clock-history"></i>
+                        Recent Meetings
+                    </h2>
 
-                <!-- Sales Card -->
-                <div class="col-xxl-4 col-md-6">
-                    <div class="card info-card sales-card">
-
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
-
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">Sales <span>| Today</span></h5>
-
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-cart"></i>
-                                </div>
-                                <div class="ps-3">
-                                    <h6>145</h6>
-                                    <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
+                    @if (Model.RecentMeetings != null && Model.RecentMeetings.Count > 0)
+                    {
+                        @foreach (var meeting in Model.RecentMeetings)
+                        {
+                            <div class="meeting-item">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8 col-12 mb-2 mb-md-0">
+                                        <h5 class="mb-2">
+                                            <i class="bi bi-briefcase-fill text-primary me-2"></i>
+                                            <strong>@meeting.Type</strong>
+                                        </h5>
+                                        <p class="mb-1 text-muted">
+                                            <i class="bi bi-building me-2"></i>@meeting.Department | 
+                                            <i class="bi bi-geo-alt ms-2 me-2"></i>@meeting.Venue
+                                        </p>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3 me-2"></i>@meeting.Date
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 col-12 text-md-end">
+                                        <span class="status-badge status-@meeting.StatusClass">
+                                            <i class="bi @(meeting.Status == "Scheduled" ? "bi-clock" : "bi-check-circle")"></i> @meeting.Status
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">No recent meetings found</p>
+                    }
 
+                    <div class="text-center mt-4">
+                        <a href="/Meeting/Index" class="quick-action-btn btn-primary-gradient" style="width: auto; display: inline-block; padding: 0.75rem 2rem;">
+                            <i class="bi bi-eye me-2"></i>View All Meetings
+                        </a>
                     </div>
-                </div><!-- End Sales Card -->
-                <!-- Revenue Card -->
-                <div class="col-xxl-4 col-md-6">
-                    <div class="card info-card revenue-card">
+                </div>
+            </div>
 
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
+            <!-- Right Sidebar -->
+            <div class="col-xl-4 col-12">
+                <!-- Quick Actions -->
+                <div class="content-card mb-3">
+                    <h2 class="card-title">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        Quick Actions
+                    </h2>
 
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
+                    <a href="/Meeting/Schedule" class="quick-action-btn btn-primary-gradient">
+                        <i class="bi bi-plus-circle me-2"></i>Schedule New Meeting
+                    </a>
+
+                    <a href="/StaffMember/Index" class="quick-action-btn btn-success-gradient">
+                        <i class="bi bi-person-plus me-2"></i>Manage Staff
+                    </a>
+
+                    <a href="/Venue/Index" class="quick-action-btn btn-info-gradient">
+                        <i class="bi bi-building me-2"></i>View Venues
+                    </a>
+
+                    <a href="/MeetingType/Index" class="quick-action-btn btn-warning-gradient" style="margin-bottom: 0;">
+                        <i class="bi bi-gear me-2"></i>Configure Types
+                    </a>
+                </div>
+
+                <!-- Weekly Stats -->
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        This Week Stats
+                    </h2>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold">Meetings Scheduled</span>
+                            <span class="gradient-text fw-bold">12</span>
                         </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 85%"></div>
+                        </div>
+                    </div>
 
-                        <div class="card-body">
-                            <h5 class="card-title">Revenue <span>| This Month</span></h5>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold">Attendance Rate</span>
+                            <span class="gradient-text fw-bold">94%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 94%"></div>
+                        </div>
+                    </div>
 
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <div style="margin-bottom: 0;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold">Venue Utilization</span>
+                            <span class="gradient-text fw-bold">78%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 78%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Activity & Charts Row -->
+        <div class="row g-4">
+            <!-- Department Activity -->
+            <div class="col-xl-6 col-12">
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        Department Activity
+                    </h2>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6 col-6">
+                            <div class="text-center p-3" style="border-radius: 15px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 2px solid rgba(102, 126, 234, 0.2);">
+                                <div class="stats-icon mx-auto" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                    <i class="bi bi-briefcase"></i>
+                                </div>
+                                <h5 class="mt-2 gradient-text mb-1">Management</h5>
+                                <p class="text-muted mb-0 small">15 Meetings</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-6">
+                            <div class="text-center p-3" style="border-radius: 15px; background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%); border: 2px solid rgba(17, 153, 142, 0.2);">
+                                <div class="stats-icon mx-auto" style="width: 50px; height: 50px; font-size: 1.5rem; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                                    <i class="bi bi-laptop"></i>
+                                </div>
+                                <h5 class="mt-2 mb-1" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">IT Department</h5>
+                                <p class="text-muted mb-0 small">28 Meetings</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-6">
+                            <div class="text-center p-3" style="border-radius: 15px; background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(254, 225, 64, 0.1) 100%); border: 2px solid rgba(250, 112, 154, 0.2);">
+                                <div class="stats-icon mx-auto" style="width: 50px; height: 50px; font-size: 1.5rem; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
                                     <i class="bi bi-currency-dollar"></i>
                                 </div>
-                                <div class="ps-3">
-                                    <h6>$3,264</h6>
-                                    <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span>
-
-                                </div>
+                                <h5 class="mt-2 mb-1" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Finance</h5>
+                                <p class="text-muted mb-0 small">22 Meetings</p>
                             </div>
                         </div>
-
-                    </div>
-                </div><!-- End Revenue Card -->
-                <!-- Customers Card -->
-                <div class="col-xxl-4 col-xl-12">
-
-                    <div class="card info-card customers-card">
-
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
-
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">Customers <span>| This Year</span></h5>
-
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-people"></i>
+                        
+                        <div class="col-md-6 col-6">
+                            <div class="text-center p-3" style="border-radius: 15px; background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%); border: 2px solid rgba(79, 172, 254, 0.2);">
+                                <div class="stats-icon mx-auto" style="width: 50px; height: 50px; font-size: 1.5rem; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                    <i class="bi bi-cart"></i>
                                 </div>
-                                <div class="ps-3">
-                                    <h6>1244</h6>
-                                    <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
-
-                                </div>
+                                <h5 class="mt-2 mb-1" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Sales</h5>
+                                <p class="text-muted mb-0 small">18 Meetings</p>
                             </div>
-
                         </div>
                     </div>
-
-                </div><!-- End Customers Card -->
-                <!-- Recent Meetings -->
-                <div class="col-12">
-                    <div class="card recent-sales overflow-auto">
-                        <div class="card-body">
-                            <h5 class="card-title">Recent Meetings <span>| This Week</span></h5>
-
-                            <table class="table table-sm table-borderless datatable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Meeting Type</th>
-                                        <th scope="col">Department</th>
-                                        <th scope="col">Venue</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><a href="#" class="text-primary fw-bold">Board Meeting</a></td>
-                                        <td>Management</td>
-                                        <td>Board Room</td>
-                                        <td>28 Dec 2024</td>
-                                        <td><span class="badge bg-success">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#" class="text-primary fw-bold">Project Planning</a></td>
-                                        <td>IT Department</td>
-                                        <td>Conference Room A</td>
-                                        <td>27 Dec 2024</td>
-                                        <td><span class="badge bg-success">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#" class="text-primary fw-bold">Budget Review</a></td>
-                                        <td>Finance</td>
-                                        <td>Executive Suite</td>
-                                        <td>26 Dec 2024</td>
-                                        <td><span class="badge bg-success">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#" class="text-primary fw-bold">Team Standup</a></td>
-                                        <td>Development</td>
-                                        <td>Virtual Meeting Room 1</td>
-                                        <td>25 Dec 2024</td>
-                                        <td><span class="badge bg-warning">In Progress</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#" class="text-primary fw-bold">Client Meeting</a></td>
-                                        <td>Sales</td>
-                                        <td>Board Room</td>
-                                        <td>24 Dec 2024</td>
-                                        <td><span class="badge bg-success">Completed</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                        </div>
-
-                    </div>
-                </div><!-- End Recent Sales -->
-                <!-- Reports -->
-                <div class="col-12">
-                    <div class="card">
-
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
-
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">Reports <span>/Today</span></h5>
-
-                            <!-- Line Chart -->
-                            <div id="reportsChart"></div>
-
-                            <script>
-                                document.addEventListener("DOMContentLoaded", () => {
-                                  new ApexCharts(document.querySelector("#reportsChart"), {
-                                    series: [{
-                                      name: 'Sales',
-                                      data: [31, 40, 28, 51, 42, 82, 56],
-                                    }, {
-                                      name: 'Revenue',
-                                      data: [11, 32, 45, 32, 34, 52, 41]
-                                    }, {
-                                      name: 'Customers',
-                                      data: [15, 11, 32, 18, 9, 24, 11]
-                                    }],
-                                    chart: {
-                                      height: 350,
-                                      type: 'area',
-                                      toolbar: {
-                                        show: false
-                                      },
-                                    },
-                                    markers: {
-                                      size: 4
-                                    },
-                                    colors: ['#4154f1', '#2eca6a', '#ff771d'],
-                                    fill: {
-                                      type: "gradient",
-                                      gradient: {
-                                        shadeIntensity: 1,
-                                        opacityFrom: 0.3,
-                                        opacityTo: 0.4,
-                                        stops: [0, 90, 100]
-                                      }
-                                    },
-                                    dataLabels: {
-                                      enabled: false
-                                    },
-                                    stroke: {
-                                      curve: 'smooth',
-                                      width: 2
-                                    },
-                                    xaxis: {
-                                      type: 'datetime',
-                                      categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
-                                    },
-                                    tooltip: {
-                                      x: {
-                                        format: 'dd/MM/yy HH:mm'
-                                      },
-                                    }
-                                  }).render();
-                                });
-                            </script>
-                            <!-- End Line Chart -->
-
-                        </div>
-
-                    </div>
-                </div><!-- End Reports -->
-                <!-- Recent Sales -->
-                <div class="col-12">
-                    <div class="card recent-sales overflow-auto">
-
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
-
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">Recent Sales <span>| Today</span></h5>
-
-                            <table class="table table-borderless datatable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Customer</th>
-                                        <th scope="col">Product</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th scope="row"><a href="#">#2457</a></th>
-                                        <td>Brandon Jacob</td>
-                                        <td><a href="#" class="text-primary">At praesentium minu</a></td>
-                                        <td>$64</td>
-                                        <td><span class="badge bg-success">Approved</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#">#2147</a></th>
-                                        <td>Bridie Kessler</td>
-                                        <td><a href="#" class="text-primary">Blanditiis dolor omnis similique</a></td>
-                                        <td>$47</td>
-                                        <td><span class="badge bg-warning">Pending</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#">#2049</a></th>
-                                        <td>Ashleigh Langosh</td>
-                                        <td><a href="#" class="text-primary">At recusandae consectetur</a></td>
-                                        <td>$147</td>
-                                        <td><span class="badge bg-success">Approved</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#">#2644</a></th>
-                                        <td>Angus Grady</td>
-                                        <td><a href="#" class="text-primar">Ut voluptatem id earum et</a></td>
-                                        <td>$67</td>
-                                        <td><span class="badge bg-danger">Rejected</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#">#2644</a></th>
-                                        <td>Raheem Lehner</td>
-                                        <td><a href="#" class="text-primary">Sunt similique distinctio</a></td>
-                                        <td>$165</td>
-                                        <td><span class="badge bg-success">Approved</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                        </div>
-
-                    </div>
-                </div><!-- End Recent Sales -->
-                <!-- Top Selling -->
-                <div class="col-12">
-                    <div class="card top-selling overflow-auto">
-
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
-
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body pb-0">
-                            <h5 class="card-title">Top Selling <span>| Today</span></h5>
-
-                            <table class="table table-borderless">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Preview</th>
-                                        <th scope="col">Product</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Sold</th>
-                                        <th scope="col">Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th scope="row"><a href="#"><img src="~/assets/img/product-1.jpg" alt=""></a></th>
-                                        <td><a href="#" class="text-primary fw-bold">Ut inventore ipsa voluptas nulla</a></td>
-                                        <td>$64</td>
-                                        <td class="fw-bold">124</td>
-                                        <td>$5,828</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#"><img src="~/assets/img/product-2.jpg" alt=""></a></th>
-                                        <td><a href="#" class="text-primary fw-bold">Exercitationem similique doloremque</a></td>
-                                        <td>$46</td>
-                                        <td class="fw-bold">98</td>
-                                        <td>$4,508</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#"><img src="~/assets/img/product-3.jpg" alt=""></a></th>
-                                        <td><a href="#" class="text-primary fw-bold">Doloribus nisi exercitationem</a></td>
-                                        <td>$59</td>
-                                        <td class="fw-bold">74</td>
-                                        <td>$4,366</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#"><img src="~/assets/img/product-4.jpg" alt=""></a></th>
-                                        <td><a href="#" class="text-primary fw-bold">Officiis quaerat sint rerum error</a></td>
-                                        <td>$32</td>
-                                        <td class="fw-bold">63</td>
-                                        <td>$2,016</td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row"><a href="#"><img src="~/assets/img/product-5.jpg" alt=""></a></th>
-                                        <td><a href="#" class="text-primary fw-bold">Sit unde debitis delectus repellendus</a></td>
-                                        <td>$79</td>
-                                        <td class="fw-bold">41</td>
-                                        <td>$3,239</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                        </div>
-
-                    </div>
-                </div><!-- End Top Selling -->
-                <!-- Meeting Statistics Chart -->
-                <div class="col-12">
-                    <div class="card">
-                        <div class="filter">
-                            <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                <li class="dropdown-header text-start">
-                                    <h6>Filter</h6>
-                                </li>
-                                <li><a class="dropdown-item" href="#">Today</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Year</a></li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">Meeting Statistics <span>/This Month</span></h5>
-
-                            <!-- Line Chart -->
-                            <div id="meetingChart"></div>
-
-                            <script>
-                                document.addEventListener("DOMContentLoaded", () => {
-                                  new ApexCharts(document.querySelector("#meetingChart"), {
-                                    series: [{
-                                      name: 'Scheduled Meetings',
-                                      data: [12, 14, 10, 18, 16, 20, 18, 22, 19, 25, 28, 24],
-                                    }, {
-                                      name: 'Completed Meetings',
-                                      data: [10, 12, 8, 15, 14, 18, 16, 20, 17, 23, 26, 22]
-                                    }, {
-                                      name: 'Cancelled Meetings',
-                                      data: [2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2]
-                                    }],
-                                    chart: {
-                                      height: 350,
-                                      type: 'area',
-                                      toolbar: {
-                                        show: false
-                                      },
-                                    },
-                                    markers: {
-                                      size: 4
-                                    },
-                                    colors: ['#4154f1', '#2eca6a', '#ff771d'],
-                                    fill: {
-                                      type: "gradient",
-                                      gradient: {
-                                        shadeIntensity: 1,
-                                        opacityFrom: 0.3,
-                                        opacityTo: 0.4,
-                                        stops: [0, 90, 100]
-                                      }
-                                    },
-                                    dataLabels: {
-                                      enabled: false
-                                    },
-                                    stroke: {
-                                      curve: 'smooth',
-                                      width: 2
-                                    },
-                                    xaxis: {
-                                      type: 'category',
-                                      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                                    },
-                                    tooltip: {
-                                      x: {
-                                        format: 'MMMM'
-                                      },
-                                    }
-                                  }).render();
-                                });
-                            </script>
-                        </div>
-
-                    </div>
-                </div><!-- End Meeting Statistics Chart -->
-
+                </div>
             </div>
-        </div><!-- End Left side columns -->
-        <!-- Right side columns -->
-        <div class="col-lg-4">
 
-            <!-- Recent Activity -->
-            <div class="card">
-                <div class="filter">
-                    <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li class="dropdown-header text-start">
-                            <h6>Filter</h6>
-                        </li>
-
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><a class="dropdown-item" href="#">This Year</a></li>
-                    </ul>
-                </div>
-
-                <div class="card-body">
-                    <h5 class="card-title">Recent Activity <span>| Today</span></h5>
-
-                    <div class="activity">
-
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">32 min</div>
-                            <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
-                            <div class="activity-content">
-                                Quia quae rerum <a href="#" class="fw-bold text-dark">explicabo officiis</a> beatae
+            <!-- Weekly Chart -->
+            <div class="col-xl-6 col-12">
+                <div class="content-card">
+                    <h2 class="card-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Weekly Meeting Trends
+                    </h2>
+                    
+                    <div class="chart-wrapper">
+                        <div class="chart-bar">
+                            <div class="chart-label">Monday</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: 80%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
                             </div>
-                        </div><!-- End activity item-->
+                            <div class="chart-value">8</div>
+                        </div>
 
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">56 min</div>
-                            <i class='bi bi-circle-fill activity-badge text-danger align-self-start'></i>
-                            <div class="activity-content">
-                                Voluptatem blanditiis blanditiis eveniet
+                        <div class="chart-bar">
+                            <div class="chart-label">Tuesday</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: 60%; background: linear-gradient(90deg, #11998e, #38ef7d);"></div>
                             </div>
-                        </div><!-- End activity item-->
+                            <div class="chart-value">6</div>
+                        </div>
 
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">2 hrs</div>
-                            <i class='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
-                            <div class="activity-content">
-                                Voluptates corrupti molestias voluptatem
+                        <div class="chart-bar">
+                            <div class="chart-label">Wednesday</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: 90%; background: linear-gradient(90deg, #fa709a, #fee140);"></div>
                             </div>
-                        </div><!-- End activity item-->
+                            <div class="chart-value">9</div>
+                        </div>
 
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">1 day</div>
-                            <i class='bi bi-circle-fill activity-badge text-info align-self-start'></i>
-                            <div class="activity-content">
-                                Tempore autem saepe <a href="#" class="fw-bold text-dark">occaecati voluptatem</a> tempore
+                        <div class="chart-bar">
+                            <div class="chart-label">Thursday</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: 70%; background: linear-gradient(90deg, #4facfe, #00f2fe);"></div>
                             </div>
-                        </div><!-- End activity item-->
+                            <div class="chart-value">7</div>
+                        </div>
 
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">2 days</div>
-                            <i class='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
-                            <div class="activity-content">
-                                Est sit eum reiciendis exercitationem
+                        <div class="chart-bar" style="margin-bottom: 0;">
+                            <div class="chart-label">Friday</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: 50%; background: linear-gradient(90deg, #f093fb, #f5576c);"></div>
                             </div>
-                        </div><!-- End activity item-->
-
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">4 weeks</div>
-                            <i class='bi bi-circle-fill activity-badge text-muted align-self-start'></i>
-                            <div class="activity-content">
-                                Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
-                            </div>
-                        </div><!-- End activity item-->
-
+                            <div class="chart-value">5</div>
+                        </div>
                     </div>
 
-                </div>
-            </div><!-- End Recent Activity -->
-            <!-- Staff by Department -->
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Staff Distribution <span>| By Department</span></h5>
-
-                    <div id="staffChart"></div>
-
-                    <script>
-                        document.addEventListener("DOMContentLoaded", () => {
-                          new ApexCharts(document.querySelector("#staffChart"), {
-                            series: [15, 12, 10, 8, 5, 3],
-                            labels: ['IT', 'HR', 'Operations', 'Finance', 'Marketing', 'Sales'],
-                            colors: ['#4154f1', '#2eca6a', '#ff771d', '#ffc107', '#17a2b8', '#6c757d'],
-                            chart: {
-                              height: 300,
-                              type: 'donut',
-                              toolbar: {
-                                show: false
-                              }
-                            },
-                            stroke: {
-                              show: false,
-                            },
-                            plotOptions: {
-                              pie: {
-                                donut: {
-                                  size: '65%',
-                                  background: 'transparent',
-
-                                  labels: {
-                                    show: true,
-                                    name: {
-                                      fontSize: '22px',
-                                      fontFamily: 'Helvetica, Arial, sans-serif',
-                                      fontWeight: 600,
-                                      color: undefined,
-                                      offsetY: -10
-                                    },
-                                    value: {
-                                      fontSize: '16px',
-                                      fontFamily: 'Helvetica, Arial, sans-serif',
-                                      fontWeight: 400,
-                                      color: '#9ca3af',
-                                      offsetY: 16
-                                    },
-                                    total: {
-                                      show: true,
-                                      label: 'Total Staff',
-                                      fontSize: '22px',
-                                      fontFamily: 'Helvetica, Arial, sans-serif',
-                                      fontWeight: 600,
-                                      color: '#373d3f'
-                                    }
-
-                                  }
-                                }
-                              }
-                            }
-                          }).render();
-                        });
-                    </script>
-                </div>
-            </div><!-- End Staff Distribution Chart -->
-            <!-- Budget Report -->
-            <div class="card">
-                <div class="filter">
-                    <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li class="dropdown-header text-start">
-                            <h6>Filter</h6>
-                        </li>
-
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><a class="dropdown-item" href="#">This Year</a></li>
-                    </ul>
-                </div>
-
-                <div class="card-body pb-0">
-                    <h5 class="card-title">Budget Report <span>| This Month</span></h5>
-
-                    <div id="budgetChart" style="min-height: 400px;" class="echart"></div>
-
-                    <script>
-                        document.addEventListener("DOMContentLoaded", () => {
-                          var budgetChart = echarts.init(document.querySelector("#budgetChart")).setOption({
-                            legend: {
-                              data: ['Allocated Budget', 'Actual Spending']
-                            },
-                            radar: {
-                              // shape: 'circle',
-                              indicator: [{
-                                  name: 'Sales',
-                                  max: 6500
-                                },
-                                {
-                                  name: 'Administration',
-                                  max: 16000
-                                },
-                                {
-                                  name: 'Information Technology',
-                                  max: 30000
-                                },
-                                {
-                                  name: 'Customer Support',
-                                  max: 38000
-                                },
-                                {
-                                  name: 'Development',
-                                  max: 52000
-                                },
-                                {
-                                  name: 'Marketing',
-                                  max: 25000
-                                }
-                              ]
-                            },
-                            series: [{
-                              name: 'Budget vs spending',
-                              type: 'radar',
-                              data: [{
-                                  value: [4200, 3000, 20000, 35000, 50000, 18000],
-                                  name: 'Allocated Budget'
-                                },
-                                {
-                                  value: [5000, 14000, 28000, 26000, 42000, 21000],
-                                  name: 'Actual Spending'
-                                }
-                              ]
-                            }]
-                          });
-                        });
-                    </script>
-
-                </div>
-            </div><!-- End Budget Report -->
-            <!-- Website Traffic -->
-            <div class="card">
-                <div class="filter">
-                    <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li class="dropdown-header text-start">
-                            <h6>Filter</h6>
-                        </li>
-
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><a class="dropdown-item" href="#">This Year</a></li>
-                    </ul>
-                </div>
-
-                <div class="card-body pb-0">
-                    <h5 class="card-title">Website Traffic <span>| Today</span></h5>
-
-                    <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-
-                    <script>
-                        document.addEventListener("DOMContentLoaded", () => {
-                          echarts.init(document.querySelector("#trafficChart")).setOption({
-                            tooltip: {
-                              trigger: 'item'
-                            },
-                            legend: {
-                              top: '5%',
-                              left: 'center'
-                            },
-                            series: [{
-                              name: 'Access From',
-                              type: 'pie',
-                              radius: ['40%', '70%'],
-                              avoidLabelOverlap: false,
-                              label: {
-                                show: false,
-                                position: 'center'
-                              },
-                              emphasis: {
-                                label: {
-                                  show: true,
-                                  fontSize: '18',
-                                  fontWeight: 'bold'
-                                }
-                              },
-                              labelLine: {
-                                show: false
-                              },
-                              data: [{
-                                  value: 1048,
-                                  name: 'Search Engine'
-                                },
-                                {
-                                  value: 735,
-                                  name: 'Direct'
-                                },
-                                {
-                                  value: 580,
-                                  name: 'Email'
-                                },
-                                {
-                                  value: 484,
-                                  name: 'Union Ads'
-                                },
-                                {
-                                  value: 300,
-                                  name: 'Video Ads'
-                                }
-                              ]
-                            }]
-                          });
-                        });
-                    </script>
-
-                </div>
-            </div><!-- End Website Traffic -->
-            <!-- Meeting Types Overview -->
-            <div class="card">
-                <div class="card-body pb-0">
-                    <h5 class="card-title">Meeting Types <span>| Overview</span></h5>
-
-                    <div class="news">
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-1.jpg" alt="" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
-                            <h4><a href="#">Board Meeting</a></h4>
-                            <p>Strategic decision making</p>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                            <span class="legend-text">Scheduled</span>
                         </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-2.jpg" alt="" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
-                            <h4><a href="#">Project Planning</a></h4>
-                            <p>Project kickoff sessions</p>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #11998e, #38ef7d);"></div>
+                            <span class="legend-text">Completed</span>
                         </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-3.jpg" alt="" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
-                            <h4><a href="#">Team Standup</a></h4>
-                            <p>Daily synchronization</p>
-                        </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/messages-1.jpg" alt="" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover;">
-                            <h4><a href="#">Budget Review</a></h4>
-                            <p>Financial planning</p>
-                        </div>
-
-                    </div><!-- End news -->
-
-                </div>
-            </div><!-- End Meeting Types Overview -->
-            <!-- News & Updates Traffic -->
-            <div class="card">
-                <div class="filter">
-                    <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                        <li class="dropdown-header text-start">
-                            <h6>Filter</h6>
-                        </li>
-
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><a class="dropdown-item" href="#">This Year</a></li>
-                    </ul>
-                </div>
-
-                <div class="card-body pb-0">
-                    <h5 class="card-title">News &amp; Updates <span>| Today</span></h5>
-
-                    <div class="news">
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-1.jpg" alt="">
-                            <h4><a href="#">Nihil blanditiis at in nihil autem</a></h4>
-                            <p>Sit recusandae non aspernatur laboriosam. Quia enim eligendi sed ut harum...</p>
-                        </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-2.jpg" alt="">
-                            <h4><a href="#">Quidem autem et impedit</a></h4>
-                            <p>Illo nemo neque maiores vitae officiis cum eum turos elan dries werona nande...</p>
-                        </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-3.jpg" alt="">
-                            <h4><a href="#">Id quia et et ut maxime similique occaecati ut</a></h4>
-                            <p>Fugiat voluptas vero eaque accusantium eos. Consequuntur sed ipsam et totam...</p>
-                        </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-4.jpg" alt="">
-                            <h4><a href="#">Laborum corporis quo dara net para</a></h4>
-                            <p>Qui enim quia optio. Eligendi aut asperiores enim repellendusvel rerum cuder...</p>
-                        </div>
-
-                        <div class="post-item clearfix">
-                            <img src="~/assets/img/news-5.jpg" alt="">
-                            <h4><a href="#">Et dolores corrupti quae illo quod dolor</a></h4>
-                            <p>Odit ut eveniet modi reiciendis. Atque cupiditate libero beatae dignissimos eius...</p>
-                        </div>
-
-                    </div><!-- End sidebar recent posts-->
-
-                </div>
-            </div><!-- End News & Updates -->
-
-            <!-- Quick Actions -->
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Quick Actions</h5>
-
-                    <div class="d-grid gap-2">
-                        <a href="@Url.Action("Create", "MeetingType")" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-plus-circle me-1"></i> Add Meeting Type
-                        </a>
-                        <a href="@Url.Action("Create", "StaffMember")" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-person-plus me-1"></i> Add Staff Member
-                        </a>
-                        <a href="@Url.Action("Create", "Venue")" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-building me-1"></i> Add Venue
-                        </a>
-                        <a href="@Url.Action("Create", "Department")" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-diagram-3 me-1"></i> Add Department
-                        </a>
                     </div>
-
                 </div>
-            </div><!-- End Quick Actions -->
-
-        </div><!-- End Right side columns -->
-
+            </div>
+        </div>
     </div>
-</section>
+</div>
+
+<script>
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true 
+        });
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // Animate progress bars on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBars = document.querySelectorAll('.progress-fill');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 300);
+        });
+
+        // Add hover effects to meeting items
+        const meetingItems = document.querySelectorAll('.meeting-item');
+        meetingItems.forEach((item, index) => {
+            item.style.animationDelay = `${0.6 + (index * 0.1)}s`;
+        });
+    });
+
+    // Add ripple effect to buttons
+    document.querySelectorAll('.quick-action-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+</script>

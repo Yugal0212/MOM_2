@@ -1,0 +1,873 @@
+@model List<MeetingMember>
+
+@{
+    ViewData["Title"] = "Meeting Members Management";
+}
+
+<style>
+    /* Animations */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .member-page .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .member-page .animate-slideInRight {
+        animation: slideInRight 0.5s ease-out forwards;
+    }
+
+    /* Stat Cards */
+    .member-page .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none !important;
+    }
+
+    .member-page .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .member-page .stat-card-info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .member-page .stat-card-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .member-page .stat-card-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    /* Table Rows */
+    .member-page .member-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    .member-page .member-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Action Buttons */
+    .member-page .btn-action {
+        transition: all 0.3s ease;
+        border: none !important;
+    }
+
+    .member-page .btn-action:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modern Badges */
+    .member-page .badge-modern {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .member-page .badge-modern:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card Modern */
+    .member-page .card-modern {
+        border: none !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: visible;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .member-page .card-modern:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Gradient Text */
+    .member-page .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    /* Icon Circles */
+    .member-page .icon-circle {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Member Icon in Table */
+    .member-page .member-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        transition: all 0.3s ease;
+    }
+
+    .member-page .member-icon:hover {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    /* Table Header */
+    .member-page .member-table thead tr {
+        background: #918dd4 !important;
+        border: none !important;
+    }
+
+    .member-page .member-table thead th {
+        border: none !important;
+        padding: 10px 12px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        font-size: 0.75rem !important;
+        text-transform: none !important;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        background: transparent !important;
+    }
+
+    .member-page .member-table thead th:first-child {
+        border-top-left-radius: 12px !important;
+    }
+
+    .member-page .member-table thead th:last-child {
+        border-top-right-radius: 12px !important;
+    }
+
+    .member-page .member-table tbody td {
+        padding: 12px 10px !important;
+        vertical-align: middle !important;
+        border: none !important;
+        font-size: 0.8rem;
+    }
+
+    .member-page .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .member-page .card-modern {
+        overflow: visible !important;
+    }
+
+    /* Pagination Styles */
+    .member-page .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .member-page .table-header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .member-page .right-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .member-page .total-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .member-page .search-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .member-page .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .member-page .search-wrapper i.bi-search {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .member-page .search-wrapper .clear-search {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        padding: 4px;
+        display: none;
+        transition: all 0.3s ease;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .member-page .search-wrapper .clear-search:hover {
+        background: #f0f0f0;
+        color: #667eea;
+    }
+
+    .member-page .search-wrapper .clear-search.active {
+        display: flex;
+    }
+
+    .member-page .search-box {
+        width: 100%;
+        padding-left: 40px;
+        padding-right: 40px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        height: 42px;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+    .member-page .search-box:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .member-page .search-box:focus + i.bi-search {
+        color: #667eea;
+    }
+
+    .member-page .search-box::placeholder {
+        color: #999;
+        font-weight: 400;
+    }
+
+    .member-page .pagination {
+        margin: 0;
+    }
+
+    .member-page .pagination .page-link {
+        border: none;
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #667eea;
+        font-weight: 600;
+        padding: 8px 14px;
+        transition: all 0.3s ease;
+    }
+
+    .member-page .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .member-page .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .member-page .pagination .page-item.disabled .page-link {
+        background: transparent;
+        color: #ccc;
+    }
+
+    .member-page .rows-per-page {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .member-page .rows-per-page label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .member-page .rows-per-page select {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 6px 32px 6px 12px;
+        font-weight: 600;
+        color: #667eea;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background-color: white;
+        cursor: pointer;
+        min-width: 100px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+
+    .member-page .rows-per-page select:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.02);
+    }
+
+    .member-page .rows-per-page select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Modern Add Button */
+    .member-page .btn-add-new {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .member-page .btn-add-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+
+    .member-page .btn-add-new i {
+        font-size: 1.1rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .member-page .member-table tbody tr:hover {
+            transform: none;
+        }
+        
+        .member-page .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .member-page .pagination-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .member-page .pagetitle > .d-flex {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch !important;
+        }
+
+        .member-page .btn-add-new {
+            width: 100%;
+            justify-content: center;
+            padding: 14px 24px;
+            font-size: 1rem;
+        }
+
+        .member-page .table-header-controls {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .member-page .right-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .member-page .rows-per-page {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .member-page .rows-per-page select {
+            flex: 1;
+        }
+
+        .member-page .total-badge {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .member-page .search-section {
+            flex-direction: column;
+        }
+
+        .member-page .search-wrapper {
+            max-width: 100%;
+        }
+
+        .member-page .member-table thead th {
+            font-size: 0.7rem !important;
+            padding: 8px 6px !important;
+        }
+
+        .member-page .member-table tbody td {
+            font-size: 0.75rem;
+            padding: 10px 6px !important;
+        }
+
+        .member-page .badge-modern {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+        }
+
+        .member-page .btn-action {
+            padding: 5px 8px !important;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<div class="member-page">
+<div class="pagetitle">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Meeting Members</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Meeting Members</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="@Url.Action("Create", "MeetingMember")" class="btn btn-add-new">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add New Member</span>
+        </a>
+    </div>
+</div><!-- End Page Title -->
+
+<section class="section dashboard">
+    <div class="row">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="col-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Success!</strong> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        <!-- Stats Cards with Gradient and Animation -->
+        <div class="col-xxl-4 col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <div class="stat-card stat-card-success rounded-4 shadow-lg p-4 text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Total Attendance Records</p>
+                        <h2 class="mb-0 fw-bold display-5">@Model.Count</h2>
+                    </div>
+                    <div class="icon-circle">
+                        <i class="bi bi-people-fill fs-2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table with Modern Design -->
+        <div class="col-12 animate-fadeInUp" style="animation-delay: 0.5s;">
+            <div class="card-modern">
+                <div class="card-body pt-4 pb-4">
+                    <div class="table-header-controls">
+                        <h5 class="gradient-text fw-bold fs-4 mb-0">
+                            <i class="bi bi-people-fill me-2"></i>Member Directory
+                        </h5>
+                        <div class="right-controls">
+                            <div class="rows-per-page">
+                                <label>Show:</label>
+                                <select id="memberRowsPerPage" class="form-select form-select-sm">
+                                    <option value="5">5 rows</option>
+                                    <option value="10" selected>10 rows</option>
+                                    <option value="25">25 rows</option>
+                                    <option value="50">50 rows</option>
+                                    <option value="-1">All</option>
+                                </select>
+                            </div>
+                            <span class="total-badge">@Model.Count Total</span>
+                        </div>
+                    </div>
+
+                    <span class="text-muted small fw-semibold mb-3 d-block" id="memberPageInfo">Showing all entries</span>
+
+                    @if (Model.Count == 0)
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 3.5rem; color: #667eea; opacity: 0.4;"></i>
+                            <h5 class="text-secondary mb-2 mt-3">No Meeting Members Found</h5>
+                            <p class="text-muted small mb-4">Start by adding your first meeting member</p>
+                            <a href="@Url.Action("Create")" class="btn rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 32px; font-weight: 600;">
+                                <i class="bi bi-plus-circle me-2"></i>Add New Member
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table member-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 50px;"><i class="bi bi-hash me-1"></i> ID</th>
+                                        <th scope="col"><i class="bi bi-calendar me-1"></i> Meeting</th>
+                                        <th scope="col"><i class="bi bi-person me-1"></i> Staff Member</th>
+                                        <th scope="col"><i class="bi bi-check me-1"></i> Is Present</th>
+                                        <th scope="col"><i class="bi bi-sticky me-1"></i> Remarks</th>
+                                        <th scope="col" class="text-center"><i class="bi bi-gear me-1"></i> Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memberTableBody">
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                                    @item.MeetingMemberId
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-dark fw-semibold">@item.MeetingTitle</span>
+                                                    <small class="text-muted">ID: @item.MeetingId</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-dark fw-semibold">@item.StaffName</span>
+                                                    <small class="text-muted">ID: @item.StaffId</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (item.IsPresent)
+                                                {
+                                                    <span class="badge-modern" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                                                        <i class="bi bi-check-circle-fill"></i> Yes
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge-modern" style="background: linear-gradient(135deg, #f5576c 0%, #fa709a 100%); color: white;">
+                                                        <i class="bi bi-x-circle-fill"></i> No
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@item.Remarks</small>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <a href="@Url.Action("Edit", new { id = item.MeetingMemberId })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-action" 
+                                                            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                            onclick="confirmDelete(@item.MeetingMemberId, 'Member ID @item.MeetingMemberId')" 
+                                                            title="Delete">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination Footer -->
+                        <div class="pagination-wrapper mt-3 pt-3" style="border-top: 1px solid #f0f0f0;">
+                            <nav>
+                                <ul class="pagination" id="memberPagination"></ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+</div><!-- End member-page -->
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to delete <strong><span id="memberName"></span></strong>?</p>
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Member</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Pagination functionality for Member table
+        let memberCurrentPage = 1;
+        let memberRowsPerPage = 10;
+        let memberAllRows = [];
+        let memberFilteredRows = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('memberTableBody');
+            if (tableBody) {
+                memberAllRows = Array.from(tableBody.getElementsByTagName('tr'));
+                memberFilteredRows = memberAllRows;
+                
+                // Initialize pagination
+                const rowsSelect = document.getElementById('memberRowsPerPage');
+                if (rowsSelect) {
+                    rowsSelect.addEventListener('change', function() {
+                        memberRowsPerPage = parseInt(this.value);
+                        memberCurrentPage = 1;
+                        displayMemberTable();
+                    });
+                }
+
+                // Search functionality
+                const searchInput = document.getElementById('memberSearchInput');
+                const clearBtn = document.getElementById('clearSearchBtn');
+                
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        
+                        if (searchTerm.length > 0) {
+                            clearBtn.classList.add('active');
+                        } else {
+                            clearBtn.classList.remove('active');
+                        }
+
+                        memberFilteredRows = memberAllRows.filter(row => {
+                            const text = row.textContent.toLowerCase();
+                            return text.includes(searchTerm);
+                        });
+
+                        memberCurrentPage = 1;
+                        displayMemberTable();
+                    });
+                }
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function() {
+                        searchInput.value = '';
+                        clearBtn.classList.remove('active');
+                        memberFilteredRows = memberAllRows;
+                        memberCurrentPage = 1;
+                        displayMemberTable();
+                        searchInput.focus();
+                    });
+                }
+
+                displayMemberTable();
+            }
+        });
+
+        function displayMemberTable() {
+            const totalRows = memberFilteredRows.length;
+            const totalPages = memberRowsPerPage === -1 ? 1 : Math.ceil(totalRows / memberRowsPerPage);
+
+            // Hide all rows
+            memberAllRows.forEach(row => row.style.display = 'none');
+
+            // Show filtered rows for current page
+            if (memberRowsPerPage === -1) {
+                // Show all filtered rows
+                memberFilteredRows.forEach(row => row.style.display = '');
+            } else {
+                const start = (memberCurrentPage - 1) * memberRowsPerPage;
+                const end = start + memberRowsPerPage;
+                memberFilteredRows.slice(start, end).forEach(row => row.style.display = '');
+            }
+
+            // Update page info
+            const pageInfo = document.getElementById('memberPageInfo');
+            if (pageInfo) {
+                if (memberRowsPerPage === -1) {
+                    pageInfo.textContent = `Showing all ${totalRows} entries`;
+                } else {
+                    const start = totalRows === 0 ? 0 : (memberCurrentPage - 1) * memberRowsPerPage + 1;
+                    const end = Math.min(memberCurrentPage * memberRowsPerPage, totalRows);
+                    pageInfo.textContent = `Showing ${start} to ${end} of ${totalRows} entries`;
+                }
+            }
+
+            // Update pagination
+            updateMemberPagination(totalPages);
+        }
+
+        function updateMemberPagination(totalPages) {
+            const pagination = document.getElementById('memberPagination');
+            if (!pagination) return;
+
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1 || memberRowsPerPage === -1) {
+                return;
+            }
+
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${memberCurrentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changeMemberPage(${memberCurrentPage - 1}); return false;">Previous</a>`;
+            pagination.appendChild(prevLi);
+
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, memberCurrentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            if (startPage > 1) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeMemberPage(1); return false;">1</a>`;
+                pagination.appendChild(li);
+
+                if (startPage > 2) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<span class="page-link">...</span>';
+                    pagination.appendChild(dots);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === memberCurrentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeMemberPage(${i}); return false;">${i}</a>`;
+                pagination.appendChild(li);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<span class="page-link">...</span>';
+                    pagination.appendChild(dots);
+                }
+
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeMemberPage(${totalPages}); return false;">${totalPages}</a>`;
+                pagination.appendChild(li);
+            }
+
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${memberCurrentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changeMemberPage(${memberCurrentPage + 1}); return false;">Next</a>`;
+            pagination.appendChild(nextLi);
+        }
+
+        function changeMemberPage(page) {
+            const totalPages = memberRowsPerPage === -1 ? 1 : Math.ceil(memberFilteredRows.length / memberRowsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                memberCurrentPage = page;
+                displayMemberTable();
+            }
+        }
+
+        function confirmDelete(id, name) {
+            document.getElementById('memberName').textContent = name;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", "MeetingMember")/' + id;
+            
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+}

@@ -1,148 +1,740 @@
-@model List<StaffMember>
+@model System.Data.DataTable
+@using System.Linq
 
 @{
     ViewData["Title"] = "Staff Members Management";
 }
 
+<style>
+    /* Animations - No conflicts with existing styles */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .staff-page .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .staff-page .animate-slideInRight {
+        animation: slideInRight 0.5s ease-out forwards;
+    }
+
+    /* Stat Cards - Scoped to staff page */
+    .staff-page .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none !important;
+    }
+
+    .staff-page .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .staff-page .stat-card-info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .staff-page .stat-card-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .staff-page .stat-card-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    /* Table Rows - Enhanced without breaking existing table styles */
+    .staff-page .staff-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    .staff-page .staff-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Action Buttons - Scoped styling */
+    .staff-page .btn-action {
+        transition: all 0.3s ease;
+        border: none !important;
+    }
+
+    .staff-page .btn-action:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modern Badges - Non-conflicting */
+    .staff-page .badge-modern {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+
+    .staff-page .badge-modern:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card Modern - Scoped to prevent conflicts */
+    .staff-page .card-modern {
+        border: none !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: visible;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .staff-page .card-modern:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Gradient Text */
+    .staff-page .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    /* Icon Circles */
+    .staff-page .icon-circle {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Staff Icon in Table */
+    .staff-page .staff-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        transition: all 0.3s ease;
+    }
+
+    .staff-page .staff-icon:hover {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    /* Table Header - Properly styled */
+    .staff-page .staff-table thead tr {
+        background: #918dd4 !important;
+        border: none !important;
+    }
+
+    .staff-page .staff-table thead th {
+        border: none !important;
+        padding: 10px 12px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        font-size: 0.75rem !important;
+        text-transform: none !important;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        background: transparent !important;
+    }
+
+    .staff-page .staff-table thead th:first-child {
+        border-top-left-radius: 12px !important;
+    }
+
+    .staff-page .staff-table thead th:last-child {
+        border-top-right-radius: 12px !important;
+    }
+
+    .staff-page .staff-table tbody td {
+        padding: 12px 10px !important;
+        vertical-align: middle !important;
+        border: none !important;
+        font-size: 0.8rem;
+    }
+
+    .staff-page .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .staff-page .card-modern {
+        overflow: visible !important;
+    }
+
+    /* Pagination Styles */
+    .staff-page .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .staff-page .table-header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .staff-page .right-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .staff-page .total-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .staff-page .search-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .staff-page .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .staff-page .search-wrapper i.bi-search {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .staff-page .search-wrapper .clear-search {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        padding: 4px;
+        display: none;
+        transition: all 0.3s ease;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .staff-page .search-wrapper .clear-search:hover {
+        background: #f0f0f0;
+        color: #667eea;
+    }
+
+    .staff-page .search-wrapper .clear-search.active {
+        display: flex;
+    }
+
+    .staff-page .search-box {
+        width: 100%;
+        padding-left: 40px;
+        padding-right: 40px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        height: 42px;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+    .staff-page .search-box:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .staff-page .search-box:focus + i.bi-search {
+        color: #667eea;
+    }
+
+    .staff-page .search-box::placeholder {
+        color: #999;
+        font-weight: 400;
+    }
+
+    .staff-page .pagination {
+        margin: 0;
+    }
+
+    .staff-page .pagination .page-link {
+        border: none;
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #667eea;
+        font-weight: 600;
+        padding: 8px 14px;
+        transition: all 0.3s ease;
+    }
+
+    .staff-page .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .staff-page .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .staff-page .pagination .page-item.disabled .page-link {
+        background: transparent;
+        color: #ccc;
+    }
+
+    .staff-page .rows-per-page {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .staff-page .rows-per-page label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .staff-page .rows-per-page select {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 6px 32px 6px 12px;
+        font-weight: 600;
+        color: #667eea;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background-color: white;
+        cursor: pointer;
+        min-width: 100px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+
+    .staff-page .rows-per-page select:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.02);
+    }
+
+    .staff-page .rows-per-page select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .staff-page .table-controls {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Modern Add Button */
+    .staff-page .btn-add-new {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .staff-page .btn-add-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+
+    .staff-page .btn-add-new i {
+        font-size: 1.1rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .staff-page .staff-table tbody tr:hover {
+            transform: none;
+        }
+        
+        .staff-page .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .staff-page .pagination-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .staff-page .pagetitle > .d-flex {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch !important;
+        }
+
+        .staff-page .btn-add-new {
+            width: 100%;
+            justify-content: center;
+            padding: 14px 24px;
+            font-size: 1rem;
+        }
+
+        .staff-page .table-header-controls {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .staff-page .right-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .staff-page .rows-per-page {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .staff-page .rows-per-page select {
+            flex: 1;
+        }
+
+        .staff-page .total-badge {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .staff-page .search-section {
+            flex-direction: column;
+        }
+
+        .staff-page .search-wrapper {
+            max-width: 100%;
+        }
+
+        .staff-page .staff-table thead th {
+            font-size: 0.7rem !important;
+            padding: 8px 6px !important;
+        }
+
+        .staff-page .staff-table tbody td {
+            font-size: 0.75rem;
+            padding: 10px 6px !important;
+        }
+
+        .staff-page .badge-modern {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+        }
+
+        .staff-page .btn-action {
+            padding: 5px 8px !important;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<div class="staff-page">
 <div class="pagetitle">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1>Staff Members</h1>
             <nav>
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
                     <li class="breadcrumb-item active">Staff Members</li>
                 </ol>
             </nav>
         </div>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-person-plus me-2"></i> Add New Member
+        <a href="@Url.Action("Create", "StaffMember")" class="btn btn-add-new">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add New Member</span>
         </a>
     </div>
-</div>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i>
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+</div><!-- End Page Title -->
 
 <section class="section dashboard">
     <div class="row">
-        <!-- Stats Cards -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card sales-card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Staff</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>@Model.Count</h6>
-                            <span class="text-success small pt-1 fw-bold">@Model.Count(s => s.IsActive) Active</span>
-                        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="col-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Success!</strong> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        <!-- Stats Cards with Gradient and Animation -->
+        <div class="col-xxl-3 col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <div class="stat-card stat-card-success rounded-4 shadow-lg p-4 text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Total Staff</p>
+                        <h2 class="mb-0 fw-bold display-5">@Model.Rows.Count</h2>
+                        <small class="opacity-90"><i class="bi bi-arrow-up"></i> Team Members</small>
+                    </div>
+                    <div class="icon-circle">
+                        <i class="bi bi-people-fill fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card revenue-card">
-                <div class="card-body">
-                    <h5 class="card-title">Departments</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-diagram-3"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>@(Model.Count > 0 ? Model.Select(s => s.Department).Distinct().Count() : 0)</h6>
-                            <span class="text-info small pt-1 fw-bold">Teams</span>
-                        </div>
+        <div class="col-xxl-3 col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.3s;">
+            <div class="stat-card rounded-4 shadow-lg p-4 text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Departments</p>
+                        <h2 class="mb-0 fw-bold display-5">@(ViewBag.DepartmentNames != null ? ((Dictionary<int, string>)ViewBag.DepartmentNames).Count : 0)</h2>
+                        <small class="opacity-90"><i class="bi bi-diagram-3"></i> Teams</small>
+                    </div>
+                    <div class="icon-circle">
+                        <i class="bi bi-diagram-3-fill fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card customers-card">
-                <div class="card-body">
-                    <h5 class="card-title">Inactive</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-exclamation-circle"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>@Model.Count(s => !s.IsActive)</h6>
-                            <span class="text-warning small pt-1 fw-bold">Inactive</span>
-                        </div>
+        <div class="col-xxl-3 col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+            <div class="stat-card stat-card-warning rounded-4 shadow-lg p-4 text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Last Modified</p>
+                        <h2 class="mb-0 fw-bold display-6">@(Model.Rows.Count > 0 ? Model.AsEnumerable().Max(s => Convert.ToDateTime(s["Modified"])).ToString("MMM dd") : "N/A")</h2>
+                        <small class="opacity-90"><i class="bi bi-clock-history"></i> Updated</small>
+                    </div>
+                    <div class="icon-circle">
+                        <i class="bi bi-clock-history fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Professional staff table with View Details link and improved styling -->
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-4">
-                    <h5 class="card-title mb-4">Staff Directory</h5>
+        <!-- Search & Filters Section -->
+        <div class="card card-modern mb-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+             <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                <h6 class="card-title text-white mb-0 d-flex align-items-center">
+                    <i class="bi bi-funnel-fill me-2"></i>Search & Filters
+                </h6>
+            </div>
+            <div class="card-body p-4 bg-white" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                <form method="get" action="@Url.Action("Index", "StaffMember")">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-muted">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-2" style="border-radius: 10px 0 0 10px; border-right: none;"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" name="searchTerm" class="form-control border-2" placeholder="Name, Dept, Email..." value="@ViewBag.CurrentSearch" style="border-radius: 0 10px 10px 0; border-left: none;">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Department</label>
+                            <select name="departmentId" class="form-select border-2" style="border-radius: 10px;">
+                                <option value="">All Departments</option>
+                                @if(ViewBag.Departments != null) {
+                                    foreach(var dept in (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Departments) {
+                                        var isSelected = ViewBag.CurrentDepartmentId != null && ViewBag.CurrentDepartmentId.ToString() == dept.Value ? "selected" : "";
+                                        <option value="@dept.Value" selected="@isSelected">@dept.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                             <label class="form-label small fw-semibold text-muted">Status</label>
+                            <select name="isActive" class="form-select border-2" style="border-radius: 10px;">
+                                <option value="">All Status</option>
+                                <!option value="true" @(ViewBag.CurrentIsActive == "true" ? "selected" : "")>Active</!option>
+                                <!option value="false" @(ViewBag.CurrentIsActive == "false" ? "selected" : "")>Inactive</!option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 d-flex align-items-end gap-2">
+                             <button type="submit" class="btn text-white fw-semibold px-4 w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; border:none; padding: 10px;">
+                                <i class="bi bi-funnel me-2"></i>Apply
+                            </button>
+                            <a href="@Url.Action("Index", "StaffMember")" class="btn btn-light text-muted fw-semibold w-50" style="border-radius: 10px; padding: 10px;">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-                    @if (Model.Count == 0)
+        <!-- Main Table with Modern Design -->
+        <div class="col-12 animate-fadeInUp" style="animation-delay: 0.5s;">
+            <div class="card-modern">
+                <div class="card-body pt-4 pb-4">
+                    <div class="table-header-controls">
+                        <h5 class="gradient-text fw-bold fs-4 mb-0">
+                            <i class="bi bi-people-fill me-2"></i>Staff Directory
+                        </h5>
+                        <div class="right-controls">
+                            <div class="rows-per-page">
+                                <label>Show:</label>
+                                <select id="staffRowsPerPage" class="form-select form-select-sm">
+                                    <option value="5">5 rows</option>
+                                    <option value="10" selected>10 rows</option>
+                                    <option value="25">25 rows</option>
+                                    <option value="50">50 rows</option>
+                                    <option value="-1">All</option>
+                                </select>
+                            </div>
+                            <span class="total-badge">@Model.Rows.Count Total</span>
+                        </div>
+                    </div>
+
+                    <span class="text-muted small fw-semibold mb-3 d-block" id="staffPageInfo">Showing all entries</span>
+
+
+
+                    @if (Model.Rows.Count == 0)
                     {
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle me-2"></i>
-                            No staff members found. <a asp-action="Create">Add one</a>
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 3.5rem; color: #667eea; opacity: 0.4;"></i>
+                            <h5 class="text-secondary mb-2 mt-3">No Staff Members Found</h5>
+                            <p class="text-muted small mb-4">Start by adding your first staff member</p>
+                            <a href="@Url.Action("Create")" class="btn rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 32px; font-weight: 600;">
+                                <i class="bi bi-plus-circle me-2"></i>Add New Member
+                            </a>
                         </div>
                     }
                     else
                     {
                         <div class="table-responsive">
-                            <table class="table table-hover datatable">
-                                <thead class="table-light">
+                            <table class="table staff-table mb-0">
+                                <thead>
                                     <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Employee ID</th>
-                                        <th scope="col">Department</th>
-                                        <th scope="col">Position</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Phone</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Actions</th>
+                                        <th scope="col"><i class="bi bi-hash me-1"></i> ID</th>
+                                        <th scope="col"><i class="bi bi-person me-1"></i> Name</th>
+                                        <th scope="col"><i class="bi bi-envelope me-1"></i> Email</th>
+                                        <th scope="col"><i class="bi bi-phone me-1"></i> Mobile</th>
+                                        <th scope="col"><i class="bi bi-building me-1"></i> Department</th>
+                                        <th scope="col" class="text-center"><i class="bi bi-gear me-1"></i> Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @foreach (var item in Model)
+                                <tbody id="staffTableBody">
+                                    @foreach (System.Data.DataRow row in Model.Rows)
                                     {
                                         <tr>
-                                            <td>@item.FullName</td>
-                                            <td><span class="badge bg-light text-dark">@item.EmployeeId</span></td>
-                                            <td>@item.Department</td>
-                                            <td>@item.Position</td>
-                                            <td><a href="mailto:@item.Email">@item.Email</a></td>
-                                            <td>@item.Phone</td>
                                             <td>
-                                                @if (item.IsActive)
-                                                {
-                                                    <span class="badge bg-success">Active</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-warning">Inactive</span>
-                                                }
+                                                <span class="badge-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                                    @row["StaffID"]
+                                                </span>
                                             </td>
                                             <td>
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="View Details">
-                                                        <i class="bi bi-eye"></i>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="staff-icon">
+                                                        <i class="bi bi-person-fill" style="color: #667eea; font-size: 0.95rem;"></i>
+                                                    </div>
+                                                    <div>
+                                                        <strong class="text-dark d-block">@row["StaffName"]</strong>
+                                                        <small class="text-muted">@row["EmailAddress"]</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-secondary">@row["EmailAddress"]</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-secondary">@(row["MobileNo"] != DBNull.Value ? row["MobileNo"] : "")</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge-modern" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                                                    @(row["DepartmentName"] != DBNull.Value ? row["DepartmentName"] : "N/A")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <a href="@Url.Action("Details", new { id = row["StaffID"] })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                       title="View Details">
+                                                        <i class="bi bi-eye-fill"></i>
                                                     </a>
-                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Edit">
-                                                        <i class="bi bi-pencil"></i>
+                                                    <a href="@Url.Action("Edit", new { id = row["StaffID"] })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil-fill"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-outline-danger" title="Delete" onclick="confirmDelete(@item.Id, '@item.FullName')">
-                                                        <i class="bi bi-trash"></i>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-action" 
+                                                            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                            onclick="confirmDelete(@row["StaffID"], '@row["StaffName"]')" 
+                                                            title="Delete">
+                                                        <i class="bi bi-trash-fill"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -151,6 +743,13 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Pagination Footer -->
+                        <div class="pagination-wrapper mt-3 pt-3" style="border-top: 1px solid #f0f0f0;">
+                            <nav>
+                                <ul class="pagination" id="staffPagination"></ul>
+                            </nav>
+                        </div>
                     }
                 </div>
             </div>
@@ -158,6 +757,7 @@
 
     </div>
 </section>
+</div><!-- End staff-page -->
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
@@ -184,6 +784,184 @@
 
 @section Scripts {
     <script>
+        // Pagination functionality for Staff table
+        let staffCurrentPage = 1;
+        let staffRowsPerPage = 10;
+        let staffAllRows = [];
+        let staffFilteredRows = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('staffTableBody');
+            if (tableBody) {
+                staffAllRows = Array.from(tableBody.getElementsByTagName('tr'));
+                staffFilteredRows = staffAllRows;
+                
+                // Initialize pagination
+                const rowsSelect = document.getElementById('staffRowsPerPage');
+                if (rowsSelect) {
+                    rowsSelect.addEventListener('change', function() {
+                        staffRowsPerPage = parseInt(this.value);
+                        staffCurrentPage = 1;
+                        displayStaffPage(staffCurrentPage);
+                    });
+                }
+                
+                // Search functionality
+                const searchInput = document.getElementById('staffSearchInput');
+                const clearBtn = document.getElementById('clearSearchBtn');
+                if (searchInput) {
+                    searchInput.addEventListener('keyup', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        staffFilteredRows = staffAllRows.filter(row => {
+                            const text = row.textContent.toLowerCase();
+                            return text.includes(searchTerm);
+                        });
+                        staffCurrentPage = 1;
+                        displayStaffPage(staffCurrentPage);
+                        
+                        // Toggle clear button
+                        if (clearBtn) {
+                            if (this.value.length > 0) {
+                                clearBtn.classList.add('active');
+                            } else {
+                                clearBtn.classList.remove('active');
+                            }
+                        }
+                    });
+                    
+                    // Clear button functionality
+                    if (clearBtn) {
+                        clearBtn.addEventListener('click', function() {
+                            searchInput.value = '';
+                            staffFilteredRows = staffAllRows;
+                            staffCurrentPage = 1;
+                            displayStaffPage(staffCurrentPage);
+                            clearBtn.classList.remove('active');
+                            searchInput.focus();
+                        });
+                    }
+                }
+                
+                displayStaffPage(staffCurrentPage);
+            }
+        });
+
+        function displayStaffPage(page) {
+            const start = (page - 1) * staffRowsPerPage;
+            const end = staffRowsPerPage === -1 ? staffFilteredRows.length : start + staffRowsPerPage;
+            
+            // Hide all rows
+            staffAllRows.forEach(row => row.style.display = 'none');
+            
+            // Show only rows for current page
+            const rowsToShow = staffRowsPerPage === -1 ? staffFilteredRows : staffFilteredRows.slice(start, end);
+            rowsToShow.forEach(row => row.style.display = '');
+            
+            // Update page info
+            const totalRows = staffFilteredRows.length;
+            const showingStart = totalRows === 0 ? 0 : start + 1;
+            const showingEnd = Math.min(end, totalRows);
+            const infoText = `Showing ${showingStart} to ${showingEnd} of ${totalRows} entries`;
+            const pageInfoEl = document.getElementById('staffPageInfo');
+            const pageInfoTopEl = document.getElementById('staffPageInfoTop');
+            if (pageInfoEl) {
+                pageInfoEl.textContent = infoText;
+            }
+            if (pageInfoTopEl) {
+                pageInfoTopEl.textContent = infoText;
+            }
+            
+            // Update pagination buttons
+            updateStaffPagination();
+        }
+
+        function updateStaffPagination() {
+            const totalPages = staffRowsPerPage === -1 ? 1 : Math.ceil(staffFilteredRows.length / staffRowsPerPage);
+            const paginationEl = document.getElementById('staffPagination');
+            if (!paginationEl) return;
+            
+            paginationEl.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${staffCurrentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changeStaffPage(${staffCurrentPage - 1}); return false;">
+                <i class="bi bi-chevron-left"></i>
+            </a>`;
+            paginationEl.appendChild(prevLi);
+            
+            // Page numbers
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, staffCurrentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            if (endPage - startPage < maxPagesToShow - 1) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            
+            // First page
+            if (startPage > 1) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeStaffPage(1); return false;">1</a>`;
+                paginationEl.appendChild(li);
+                
+                if (startPage > 2) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<a class="page-link">...</a>';
+                    paginationEl.appendChild(dots);
+                }
+            }
+            
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === staffCurrentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeStaffPage(${i}); return false;">${i}</a>`;
+                paginationEl.appendChild(li);
+            }
+            
+            // Last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<a class="page-link">...</a>';
+                    paginationEl.appendChild(dots);
+                }
+                
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeStaffPage(${totalPages}); return false;">${totalPages}</a>`;
+                paginationEl.appendChild(li);
+            }
+            
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${staffCurrentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changeStaffPage(${staffCurrentPage + 1}); return false;">
+                <i class="bi bi-chevron-right"></i>
+            </a>`;
+            paginationEl.appendChild(nextLi);
+        }
+
+        function changeStaffPage(page) {
+            const totalPages = staffRowsPerPage === -1 ? 1 : Math.ceil(staffFilteredRows.length / staffRowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            staffCurrentPage = page;
+            displayStaffPage(staffCurrentPage);
+            
+            // Smooth scroll to table
+            const tableCard = document.querySelector('.staff-page .card-modern');
+            if (tableCard) {
+                tableCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Delete confirmation
         function confirmDelete(id, name) {
             document.getElementById('staffName').textContent = name;
             var form = document.getElementById('deleteForm');

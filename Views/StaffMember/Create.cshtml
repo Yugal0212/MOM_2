@@ -1,4 +1,4 @@
-@model StaffMember
+@model Staff
 
 @{
     ViewData["Title"] = "Add Staff Member";
@@ -30,61 +30,38 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
-                                <input asp-for="FirstName" class="form-control" placeholder="John" />
-                                <span asp-validation-for="FirstName" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="LastName" class="form-label">Last Name <span class="text-danger">*</span></label>
-                                <input asp-for="LastName" class="form-control" placeholder="Smith" />
-                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            <div class="col-md-12">
+                                <label asp-for="StaffName" class="form-label">Staff Name <span class="text-danger">*</span></label>
+                                <input asp-for="StaffName" class="form-control" placeholder="John Smith" />
+                                <span asp-validation-for="StaffName" class="text-danger"></span>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label asp-for="Email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                                <input asp-for="Email" class="form-control" type="email" placeholder="john.smith@company.com" />
-                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <label asp-for="EmailAddress" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                <input asp-for="EmailAddress" class="form-control" type="email" placeholder="john.smith@company.com" />
+                                <span asp-validation-for="EmailAddress" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="Phone" class="form-label">Phone Number</label>
-                                <input asp-for="Phone" class="form-control" type="tel" placeholder="+1(555)123-4567" />
-                                <span asp-validation-for="Phone" class="text-danger"></span>
+                                <label asp-for="MobileNo" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                                <input asp-for="MobileNo" class="form-control" type="tel" placeholder="+1(555)123-4567" />
+                                <span asp-validation-for="MobileNo" class="text-danger"></span>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label asp-for="EmployeeId" class="form-label">Employee ID</label>
-                                <input asp-for="EmployeeId" class="form-control" placeholder="EMP001" />
-                                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                                <label asp-for="DepartmentId" class="form-label">Department <span class="text-danger">*</span></label>
+                                <select asp-for="DepartmentId" class="form-select" asp-items="ViewBag.Departments">
+                                    <option value="">-- Select Department --</option>
+                                </select>
+                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="JoinedDate" class="form-label">Joined Date</label>
-                                <input asp-for="JoinedDate" class="form-control" type="date" />
-                                <span asp-validation-for="JoinedDate" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Department" class="form-label">Department <span class="text-danger">*</span></label>
-                                <input asp-for="Department" class="form-control" placeholder="Information Technology" />
-                                <span asp-validation-for="Department" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Position" class="form-label">Position <span class="text-danger">*</span></label>
-                                <input asp-for="Position" class="form-control" placeholder="Senior Developer" />
-                                <span asp-validation-for="Position" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
-                                <label asp-for="IsActive" class="form-check-label">Active</label>
+                                <label asp-for="Remarks" class="form-label">Remarks</label>
+                                <input asp-for="Remarks" class="form-control" placeholder="Position, notes, etc." />
+                                <span asp-validation-for="Remarks" class="text-danger"></span>
                             </div>
                         </div>
 

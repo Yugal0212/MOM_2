@@ -1,4 +1,4 @@
-@model StaffMember
+@model Staff
 
 @{
     ViewData["Title"] = "Staff Member Details";
@@ -209,9 +209,12 @@
                         <i class="bi bi-person-fill"></i>
                     </div>
                     <div class="hero-text">
-                        <h1>@Model.FullName</h1>
-                        <div class="position"><i class="bi bi-briefcase me-2"></i>@Model.Position</div>
-                        <div class="position"><i class="bi bi-diagram-3 me-2"></i>@Model.Department</div>
+                        <h1>@Model.StaffName</h1>
+                        <div class="position"><i class="bi bi-id-card me-2"></i>Staff ID: @Model.StaffId</div>
+                        @if (!string.IsNullOrEmpty(ViewBag.DepartmentName))
+                        {
+                            <div class="position"><i class="bi bi-diagram-3 me-2"></i>@ViewBag.DepartmentName</div>
+                        }
                     </div>
                 </div>
             </div>
@@ -219,43 +222,33 @@
             <!-- Contact Information -->
             <div class="section-title">Contact Information</div>
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-4">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
                             <i class="bi bi-envelope"></i>
                         </div>
                         <div class="label">Email Address</div>
-                        <h3 class="value" style="font-size: 0.95rem;"><a href="mailto:@Model.Email">@Model.Email</a></h3>
+                        <h3 class="value" style="font-size: 0.95rem;"><a href="mailto:@Model.EmailAddress">@Model.EmailAddress</a></h3>
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-4">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
                             <i class="bi bi-telephone"></i>
                         </div>
-                        <div class="label">Phone Number</div>
-                        <h3 class="value" style="font-size: 0.95rem;">@Model.Phone</h3>
+                        <div class="label">Mobile Number</div>
+                        <h3 class="value" style="font-size: 0.95rem;">@Model.MobileNo</h3>
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-3">
-                    <div class="info-card-modern">
-                        <div class="icon-wrapper">
-                            <i class="bi bi-id-card"></i>
-                        </div>
-                        <div class="label">Employee ID</div>
-                        <h3 class="value">@Model.EmployeeId</h3>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-4">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
                             <i class="bi bi-calendar-event"></i>
                         </div>
-                        <div class="label">Joined Date</div>
-                        <h3 class="value" style="font-size: 0.9rem;">@Model.JoinedDate.ToString("MMM dd, yyyy")</h3>
+                        <div class="label">Created Date</div>
+                        <h3 class="value" style="font-size: 0.9rem;">@Model.Created.ToString("MMM dd, yyyy")</h3>
                     </div>
                 </div>
             </div>
@@ -263,42 +256,23 @@
             <!-- Employment Details -->
             <div class="section-title">Employment Details</div>
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="info-card-modern">
-                        <div class="icon-wrapper">
-                            <i class="bi bi-briefcase"></i>
-                        </div>
-                        <div class="label">Position</div>
-                        <h3 class="value" style="font-size: 1.1rem;">@Model.Position</h3>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
                             <i class="bi bi-diagram-3"></i>
                         </div>
                         <div class="label">Department</div>
-                        <h3 class="value" style="font-size: 1.1rem;">@Model.Department</h3>
+                        <h3 class="value" style="font-size: 1.1rem;">@(ViewBag.DepartmentName ?? "N/A")</h3>
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-chat-text"></i>
                         </div>
-                        <div class="label">Status</div>
-                        <h3 class="value">
-                            @if (Model.IsActive)
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-warning">Inactive</span>
-                            }
-                        </h3>
+                        <div class="label">Remarks</div>
+                        <h3 class="value" style="font-size: 1.1rem;">@(Model.Remarks ?? "N/A")</h3>
                     </div>
                 </div>
             </div>
@@ -308,10 +282,10 @@
                 <a href="@Url.Action("Index", "StaffMember")" class="btn-modern btn-back">
                     <i class="bi bi-arrow-left me-2"></i> Back to List
                 </a>
-                <a href="@Url.Action("Edit", "StaffMember", new { id = Model.Id })" class="btn-modern btn-edit">
+                <a href="@Url.Action("Edit", "StaffMember", new { id = Model.StaffId })" class="btn-modern btn-edit">
                     <i class="bi bi-pencil me-2"></i> Edit Staff
                 </a>
-                <button type="button" class="btn-modern btn-delete" onclick="confirmDelete(@Model.Id, '@Model.FullName')">
+                <button type="button" class="btn-modern btn-delete" onclick="confirmDelete(@Model.StaffId, '@Model.StaffName')">
                     <i class="bi bi-trash me-2"></i> Delete Staff
                 </button>
             </div>

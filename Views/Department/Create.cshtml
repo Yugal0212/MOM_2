@@ -24,48 +24,10 @@
 
                     <!-- Department Form -->
                     <form asp-action="Create" method="post" class="row g-3">
-                        <div class="col-md-6">
-                            <label asp-for="Name" class="form-label">Department Name</label>
-                            <input asp-for="Name" class="form-control" placeholder="Enter department name" required />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label asp-for="Code" class="form-label">Department Code</label>
-                            <input asp-for="Code" class="form-control" placeholder="Enter department code" required />
-                            <span asp-validation-for="Code" class="text-danger"></span>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label asp-for="Manager" class="form-label">Manager Name</label>
-                            <input asp-for="Manager" class="form-control" placeholder="Enter manager name" />
-                            <span asp-validation-for="Manager" class="text-danger"></span>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label asp-for="EmployeeCount" class="form-label">Employee Count</label>
-                            <input asp-for="EmployeeCount" type="number" class="form-control" placeholder="0" min="0" />
-                            <span asp-validation-for="EmployeeCount" class="text-danger"></span>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label asp-for="CreatedDate" class="form-label">Created Date</label>
-                            <input asp-for="CreatedDate" type="date" class="form-control" />
-                            <span asp-validation-for="CreatedDate" class="text-danger"></span>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Status</label>
-                            <div class="form-check form-switch">
-                                <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" checked />
-                                <label asp-for="IsActive" class="form-check-label">Active</label>
-                            </div>
-                        </div>
-
                         <div class="col-md-12">
-                            <label asp-for="Description" class="form-label">Description</label>
-                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter department description"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <label asp-for="DepartmentName" class="form-label">Department Name</label>
+                            <input asp-for="DepartmentName" class="form-control" placeholder="Enter department name" required />
+                            <span asp-validation-for="DepartmentName" class="text-danger"></span>
                         </div>
 
                         <div class="col-12">

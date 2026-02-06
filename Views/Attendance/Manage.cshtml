@@ -1,0 +1,139 @@
+@model MOM.Models.AttendanceViewModel
+
+@{
+    ViewData["Title"] = "Fill Attendance";
+}
+
+<style>
+    .manage-attendance-page .card-modern {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    
+    .manage-attendance-page .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .manage-attendance-page .table-hover tbody tr:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+    }
+
+    /* Custom Checkbox */
+    .custom-checkbox .form-check-input {
+        width: 1.5em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+
+    .form-control-plaintext {
+        color: #495057;
+        font-weight: 500;
+    }
+</style>
+
+<div class="manage-attendance-page container py-4">
+    
+    <div class="header-section shadow-lg animate-fadeInUp">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h5 class="text-white-50 mb-1">Attendance For</h5>
+                <h2 class="fw-bold mb-0">@Model.MeetingTitle</h2>
+                <div class="mt-2 d-flex gap-3 align-items-center">
+                     <span class="badge bg-white bg-opacity-25 pb-2 pt-2"><i class="bi bi-calendar3 me-1"></i> @Model.MeetingDate.ToString("D")</span>
+                </div>
+            </div>
+            <div>
+                 <a href="@Url.Action("Index", "Attendance")" class="btn btn-light bg-opacity-10 text-white border-0">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" action="@Url.Action("Save", "Attendance")" class="animate-fadeInUp" style="animation-delay: 0.1s;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="MeetingId" />
+        <input type="hidden" asp-for="MeetingTitle" />
+        <input type="hidden" asp-for="MeetingDate" />
+
+        <div class="card card-modern">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3" style="width: 5%;">#</th>
+                                <th class="py-3" style="width: 25%;">Staff Member</th>
+                                <th class="py-3" style="width: 20%;">Department</th>
+                                <th class="py-3 text-center" style="width: 15%;">Present</th>
+                                <th class="py-3 pe-4" style="width: 35%;">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.StaffList != null)
+                            {
+                                for (int i = 0; i < Model.StaffList.Count; i++)
+                                {
+                                    <tr>
+                                        <td class="ps-4">
+                                            @(i + 1)
+                                            <input type="hidden" name="StaffList[@i].StaffId" value="@Model.StaffList[i].StaffId" />
+                                            <input type="hidden" name="StaffList[@i].Name" value="@Model.StaffList[i].Name" />
+                                            <input type="hidden" name="StaffList[@i].Department" value="@Model.StaffList[i].Department" />
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; font-weight: bold;">
+                                                    @Model.StaffList[i].Name.Substring(0, 1)
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">@Model.StaffList[i].Name</div>
+                                                    <small class="text-muted">ID: @Model.StaffList[i].StaffId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">@Model.StaffList[i].Department</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="form-check d-flex justify-content-center custom-checkbox">
+                                                <!input class="form-check-input" type="checkbox" name="StaffList[@i].IsPresent" value="true" @(Model.StaffList[i].IsPresent ? "checked" : "") />
+                                                <input type="hidden" name="StaffList[@i].IsPresent" value="false" />
+                                            </div>
+                                        </td>
+                                        <td class="pe-4">
+                                            <input type="text" class="form-control form-control-sm border-0 bg-light" placeholder="Optional remarks..." name="StaffList[@i].Remarks" value="@Model.StaffList[i].Remarks" style="border-radius: 8px;">
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">No staff members found.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white p-4 border-top-0 d-flex justify-content-end gap-2">
+                 <button type="button" class="btn btn-light" onclick="window.history.back()">Cancel</button>
+                 <button type="submit" class="btn btn-primary px-5 fw-bold gradient-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border:none; border-radius: 10px;">
+                    <i class="bi bi-save me-2"></i>Save Attendance
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Optional: Client-side logic 'Select All' if wanted
+    </script>
+}

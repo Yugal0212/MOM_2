@@ -1,26 +1,38 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using MOM.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 
 namespace MOM.Controllers
 {
+    [Authorize]
     public class MeetingTypeController : Controller
     {
-        private static List<MeetingType> _meetingTypes = new List<MeetingType>
+        private readonly IConfiguration _configuration;
+
+        public MeetingTypeController(IConfiguration configuration)
         {
-            new MeetingType { Id = 1, Name = "Board Meeting", Code = "BM", Description = "Executive board meeting", DefaultDuration = 120, CreatedDate = new DateTime(2023, 1, 15), IsActive = true },
-            new MeetingType { Id = 2, Name = "Team Standup", Code = "TS", Description = "Daily team synchronization", DefaultDuration = 30, CreatedDate = new DateTime(2023, 2, 10), IsActive = true },
-            new MeetingType { Id = 3, Name = "Project Planning", Code = "PP", Description = "Project kickoff and planning session", DefaultDuration = 90, CreatedDate = new DateTime(2023, 3, 5), IsActive = true },
-            new MeetingType { Id = 4, Name = "Budget Review", Code = "BR", Description = "Financial review and budget planning", DefaultDuration = 120, CreatedDate = new DateTime(2023, 4, 12), IsActive = true },
-            new MeetingType { Id = 5, Name = "Client Meeting", Code = "CM", Description = "Client presentation and discussion", DefaultDuration = 60, CreatedDate = new DateTime(2023, 5, 8), IsActive = true },
-            new MeetingType { Id = 6, Name = "Training Session", Code = "TR", Description = "Staff training and development", DefaultDuration = 120, CreatedDate = new DateTime(2023, 6, 20), IsActive = true }
-        };
+            _configuration = configuration;
+        }
 
         public IActionResult Index()
         {
-            return View(_meetingTypes);
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+
+            SqlCommand command = connection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_MeetingType_GetAll";
+            SqlDataReader reader = command.ExecuteReader();
+
+            DataTable table = new DataTable();
+            table.Load(reader);
+            connection.Close();
+
+            return View(table);
         }
 
         public IActionResult Create()
@@ -33,12 +45,19 @@ namespace MOM.Controllers
         {
             if (ModelState.IsValid)
             {
-                meetingType.Id = _meetingTypes.Any() ? _meetingTypes.Max(d => d.Id) + 1 : 1;
-                if (meetingType.CreatedDate == default)
-                {
-                    meetingType.CreatedDate = DateTime.Now;
-                }
-                _meetingTypes.Add(meetingType);
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_MeetingType_Create";
+                command.Parameters.AddWithValue("@MeetingTypeName", meetingType.MeetingTypeName);
+                command.Parameters.AddWithValue("@Remarks", meetingType.Remarks ?? (object)DBNull.Value);
+                
+                command.ExecuteNonQuery();
+                connection.Close();
+                
                 TempData["Success"] = "Meeting Type created successfully!";
                 return RedirectToAction(nameof(Index));
             }
@@ -47,59 +66,120 @@ namespace MOM.Controllers
 
         public IActionResult Edit(int id)
         {
-            var meetingType = _meetingTypes.FirstOrDefault(m => m.Id == id);
-            if (meetingType == null)
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            
+            SqlCommand command = connection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_MeetingType_GetByID";
+            command.Parameters.AddWithValue("@MeetingTypeID", id);
+            
+            SqlDataReader reader = command.ExecuteReader();
+            DataTable table = new DataTable();
+            table.Load(reader);
+            connection.Close();
+            
+            if (table.Rows.Count == 0)
             {
                 return NotFound();
             }
+            
+            DataRow row = table.Rows[0];
+            MeetingType meetingType = new MeetingType
+            {
+                MeetingTypeId = Convert.ToInt32(row["MeetingTypeID"]),
+                MeetingTypeName = row["MeetingTypeName"].ToString(),
+                Remarks = row["Remarks"] != DBNull.Value ? row["Remarks"].ToString() : null
+            };
+            
             return View(meetingType);
         }
 
         [HttpPost]
         public IActionResult Edit(int id, MeetingType meetingType)
         {
-            if (id != meetingType.Id)
+            if (id != meetingType.MeetingTypeId)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                var existing = _meetingTypes.FirstOrDefault(m => m.Id == id);
-                if (existing != null)
-                {
-                    existing.Name = meetingType.Name;
-                    existing.Code = meetingType.Code;
-                    existing.Description = meetingType.Description;
-                    existing.DefaultDuration = meetingType.DefaultDuration;
-                    existing.IsActive = meetingType.IsActive;
-                    
-                    TempData["Success"] = "Meeting Type updated successfully!";
-                    return RedirectToAction(nameof(Index));
-                }
-                return NotFound();
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_MeetingType_Update";
+                command.Parameters.AddWithValue("@MeetingTypeID", meetingType.MeetingTypeId);
+                command.Parameters.AddWithValue("@MeetingTypeName", meetingType.MeetingTypeName);
+                command.Parameters.AddWithValue("@Remarks", meetingType.Remarks ?? (object)DBNull.Value);
+                
+                command.ExecuteNonQuery();
+                connection.Close();
+                
+                TempData["Success"] = "Meeting Type updated successfully!";
+                return RedirectToAction(nameof(Index));
             }
             return View(meetingType);
         }
 
         public IActionResult Details(int id)
         {
-            var meetingType = _meetingTypes.FirstOrDefault(m => m.Id == id);
-            if (meetingType == null)
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            
+            SqlCommand command = connection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "SP_MeetingType_GetByID";
+            command.Parameters.AddWithValue("@MeetingTypeID", id);
+            
+            SqlDataReader reader = command.ExecuteReader();
+            DataTable table = new DataTable();
+            table.Load(reader);
+            connection.Close();
+            
+            if (table.Rows.Count == 0)
             {
                 return NotFound();
             }
+            
+            DataRow row = table.Rows[0];
+            MeetingType meetingType = new MeetingType
+            {
+                MeetingTypeId = Convert.ToInt32(row["MeetingTypeID"]),
+                MeetingTypeName = row["MeetingTypeName"].ToString(),
+                Remarks = row["Remarks"] != DBNull.Value ? row["Remarks"].ToString() : null
+            };
+            
             return View(meetingType);
         }
 
         [HttpPost]
         public IActionResult Delete(int id)
         {
-            var meetingType = _meetingTypes.FirstOrDefault(m => m.Id == id);
-            if (meetingType != null)
+            try
             {
-                _meetingTypes.Remove(meetingType);
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = "SP_MeetingType_Delete";
+                command.Parameters.AddWithValue("@MeetingTypeID", id);
+                
+                command.ExecuteNonQuery();
+                connection.Close();
+                
                 TempData["Success"] = "Meeting Type deleted successfully!";
+            }
+            catch(SqlException)
+            {
+                TempData["Error"] = "Cannot delete meeting type as it is referenced by meetings.";
             }
             return RedirectToAction(nameof(Index));
         }

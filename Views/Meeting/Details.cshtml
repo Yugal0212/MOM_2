@@ -1,0 +1,134 @@
+@model MOM.Models.Meeting
+
+@{
+    ViewData["Title"] = "Meeting Details";
+}
+
+<style>
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .details-page .details-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .details-page .card-header-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .details-page .detail-row {
+        padding: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+    }
+
+    .details-page .detail-row:hover {
+        background: rgba(102, 126, 234, 0.03);
+    }
+
+    .details-page .detail-label {
+        font-weight: 600;
+        color: #667eea;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .details-page .detail-value {
+        color: #4a5568;
+        font-size: 1rem;
+    }
+
+    .details-page .btn-action {
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+</style>
+
+<div class="details-page">
+    <div class="pagetitle animate-fadeInUp">
+        <h1><i class="bi bi-info-circle me-2"></i>Meeting Details</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Meeting")">Meetings</a></li>
+                <li class="breadcrumb-item active">Details</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="details-card animate-fadeInUp">
+                    <div class="card-header-custom">
+                        <i class="bi bi-calendar-event" style="font-size: 3rem;"></i>
+                        <h2 class="mt-3">@Model.Title</h2>
+                        <p>Meeting ID: #@Model.MeetingId</p>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="row g-0">
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-tag-fill"></i> Meeting Type</div>
+                                <div class="detail-value">@Model.MeetingTypeName</div>
+                            </div>
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-geo-alt-fill"></i> Venue</div>
+                                <div class="detail-value">@Model.VenueName</div>
+                            </div>
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-calendar3"></i> Meeting Date</div>
+                                <div class="detail-value">@Model.MeetingDate.ToString("MMMM dd, yyyy")</div>
+                            </div>
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-clock"></i> Time</div>
+                                <div class="detail-value">@Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")</div>
+                            </div>
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-building"></i> Department</div>
+                                <div class="detail-value">@Model.DepartmentName</div>
+                            </div>
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-flag-fill"></i> Priority</div>
+                                <div class="detail-value">@Model.Priority</div>
+                            </div>
+                            <div class="col-md-6 detail-row">
+                                <div class="detail-label"><i class="bi bi-toggle-on"></i> Status</div>
+                                <div class="detail-value">@Model.Status</div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.MeetingDescription))
+                            {
+                                <div class="col-12 detail-row">
+                                    <div class="detail-label"><i class="bi bi-card-text"></i> Description</div>
+                                    <div class="detail-value">@Model.MeetingDescription</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-center p-4" style="background: #f8f9fa;">
+                        <a href="@Url.Action("Edit", new { id = Model.MeetingId })" class="btn btn-action" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <i class="bi bi-pencil me-2"></i>Edit Meeting
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-action btn-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

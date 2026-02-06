@@ -1,169 +1,192 @@
-@model List<Venue>
+@model System.Data.DataTable
 
 @{
     ViewData["Title"] = "Meeting Venues Management";
 }
 
+<style>
+    /* Animations - No conflicts with existing styles */
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .venue-page .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    /* Card Modern */
+    .venue-page .card-modern {
+        border: none !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: visible;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    /* Table Rows */
+    .venue-page .venue-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    .venue-page .venue-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+        transform: translateX(5px);
+    }
+    
+    .venue-page .venue-table thead tr {
+        background: #918dd4 !important;
+        border: none !important;
+    }
+
+    .venue-page .venue-table thead th {
+        border: none !important;
+        padding: 10px 12px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+    }
+
+    /* Action Buttons */
+    .venue-page .btn-action {
+        transition: all 0.3s ease;
+        border: none !important;
+    }
+
+    .venue-page .btn-action:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .venue-page .venue-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .venue-page .badge-modern {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        color: white;
+    }
+</style>
+
+<div class="venue-page">
 <div class="pagetitle">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1>Meeting Venues</h1>
             <nav>
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
                     <li class="breadcrumb-item active">Venues</li>
                 </ol>
             </nav>
         </div>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i> Add New Venue
+        <a href="@Url.Action("Create", "Venue")" class="btn btn-primary rounded-pill shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add New Venue
         </a>
     </div>
-</div>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i>
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+</div><!-- End Page Title -->
 
 <section class="section dashboard">
     <div class="row">
-        <!-- Stats Cards -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card sales-card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Venues</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-building"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>@Model.Count</h6>
-                            <span class="text-success small pt-1 fw-bold">@Model.Count(v => v.IsActive) Active</span>
-                        </div>
-                    </div>
+        @if (TempData["Success"] != null)
+        {
+            <div class="col-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Success!</strong> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             </div>
-        </div>
+        }
 
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card revenue-card">
-                <div class="card-body">
-                    <h5 class="card-title">Physical Venues</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-geo-alt"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>@Model.Count(v => v.VenueType == "Physical")</h6>
-                            <span class="text-primary small pt-1 fw-bold">On-Site</span>
-                        </div>
+        <div class="col-12 animate-fadeInUp">
+            <div class="card card-modern">
+                <div class="card-body pt-4 pb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold fs-4 mb-0 text-primary">
+                            <i class="bi bi-building-fill me-2"></i>Venue Directory
+                        </h5>
+                        <span class="badge bg-light text-dark border">@Model.Rows.Count Total Venues</span>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card customers-card">
-                <div class="card-body">
-                    <h5 class="card-title">Virtual Venues</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-broadcast"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>@Model.Count(v => v.VenueType == "Virtual")</h6>
-                            <span class="text-warning small pt-1 fw-bold">Online</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Professional venues table with View Details link and venue type indicators -->
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-4">
-                    <h5 class="card-title mb-4">All Meeting Venues</h5>
-
-                    @if (Model.Count == 0)
+                    @if (Model.Rows.Count == 0)
                     {
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle me-2"></i>
-                            No venues found. <a asp-action="Create">Create one</a>
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 3.5rem; color: #667eea; opacity: 0.4;"></i>
+                            <h5 class="text-secondary mb-2 mt-3">No Venues Found</h5>
+                            <p class="text-muted small mb-4">Start by adding your first venue</p>
+                            <a href="@Url.Action("Create")" class="btn btn-primary rounded-pill">
+                                <i class="bi bi-plus-circle me-2"></i>Add venue
+                            </a>
                         </div>
                     }
                     else
                     {
                         <div class="table-responsive">
-                            <table class="table table-hover datatable">
-                                <thead class="table-light">
+                            <table class="table venue-table mb-0">
+                                <thead>
                                     <tr>
-                                        <th scope="col">Venue Name</th>
-                                        <th scope="col">Type</th>
-                                        <th scope="col">Location</th>
-                                        <th scope="col">Capacity</th>
-                                        <th scope="col">Equipment</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Actions</th>
+                                        <th scope="col" style="border-top-left-radius: 10px;"><i class="bi bi-hash me-1"></i> ID</th>
+                                        <th scope="col"><i class="bi bi-building me-1"></i> Venue Name</th>
+                                        <th scope="col"><i class="bi bi-calendar me-1"></i> Created On</th>
+                                        <th scope="col" class="text-center" style="border-top-right-radius: 10px;"><i class="bi bi-gear me-1"></i> Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model)
+                                    @foreach (System.Data.DataRow row in Model.Rows)
                                     {
                                         <tr>
-                                            <td>@item.Name</td>
                                             <td>
-                                                @if (item.VenueType == "Physical")
-                                                {
-                                                    <span class="badge bg-primary">Physical</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-success">Virtual</span>
-                                                }
-                                            </td>
-                                            <td>@item.Location</td>
-                                            <td>
-                                                @if (item.VenueType == "Virtual")
-                                                {
-                                                    <span>Unlimited</span>
-                                                }
-                                                else
-                                                {
-                                                    <span>@item.Capacity persons</span>
-                                                }
+                                                <span class="badge-modern">
+                                                    @row["MeetingVenueID"]
+                                                </span>
                                             </td>
                                             <td>
-                                                @if (!string.IsNullOrEmpty(item.Equipment))
-                                                {
-                                                    @item.Equipment.Substring(0, Math.Min(30, item.Equipment.Length))<text>...</text>
-                                                }
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="venue-icon">
+                                                        <i class="bi bi-building-fill" style="color: #667eea; font-size: 0.95rem;"></i>
+                                                    </div>
+                                                    <strong class="text-dark">@row["MeetingVenueName"]</strong>
+                                                </div>
                                             </td>
                                             <td>
-                                                @if (item.IsActive)
-                                                {
-                                                    <span class="badge bg-success">Active</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-warning">Inactive</span>
-                                                }
+                                                <span class="text-secondary">
+                                                    @Convert.ToDateTime(row["Created"]).ToString("MMM dd, yyyy")
+                                                </span>
                                             </td>
                                             <td>
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="View Details">
-                                                        <i class="bi bi-eye"></i>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <a href="@Url.Action("Details", new { id = row["MeetingVenueID"] })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                       title="View Details">
+                                                        <i class="bi bi-eye-fill"></i>
                                                     </a>
-                                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Edit">
-                                                        <i class="bi bi-pencil"></i>
+                                                    <a href="@Url.Action("Edit", new { id = row["MeetingVenueID"] })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil-fill"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-outline-danger" title="Delete" onclick="confirmDelete(@item.Id, '@item.Name')">
-                                                        <i class="bi bi-trash"></i>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-action" 
+                                                            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" 
+                                                            onclick="confirmDelete(@row["MeetingVenueID"], '@row["MeetingVenueName"]')" 
+                                                            title="Delete">
+                                                        <i class="bi bi-trash-fill"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -176,9 +199,9 @@
                 </div>
             </div>
         </div>
-
     </div>
 </section>
+</div>
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
@@ -203,14 +226,12 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function confirmDelete(id, name) {
-            document.getElementById('venueName').textContent = name;
-            var form = document.getElementById('deleteForm');
-            form.action = '@Url.Action("Delete", "Venue")/' + id;
-            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
-        }
-    </script>
-}
+<script>
+    function confirmDelete(id, name) {
+        document.getElementById('venueName').textContent = name;
+        var form = document.getElementById('deleteForm');
+        form.action = '@Url.Action("Delete", "Venue")/' + id;
+        var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+</script>

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\mom-main 2\\MOM.csproj": {}
+    "D:\\Project\\MOM_2\\MOM.csproj": {}
   },
   "projects": {
-    "D:\\mom-main 2\\MOM.csproj": {
+    "D:\\Project\\MOM_2\\MOM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\mom-main 2\\MOM.csproj",
+        "projectUniqueName": "D:\\Project\\MOM_2\\MOM.csproj",
         "projectName": "MOM",
-        "projectPath": "D:\\mom-main 2\\MOM.csproj",
+        "projectPath": "D:\\Project\\MOM_2\\MOM.csproj",
         "packagesPath": "C:\\Users\\jakas\\.nuget\\packages\\",
-        "outputPath": "D:\\mom-main 2\\obj\\",
+        "outputPath": "D:\\Project\\MOM_2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -49,6 +49,18 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

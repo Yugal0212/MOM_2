@@ -214,70 +214,45 @@
             <div class="details-hero">
                 <div class="hero-header">
                     <div class="hero-content">
-                        <h1>@Model.Name</h1>
+                        <h1>@Model.MeetingTypeName</h1>
                         <div class="meta">
                             <div class="meta-item">
-                                <i class="bi bi-code-square"></i>
-                                <span>@Model.Code</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="bi bi-clock"></i>
-                                <span>@Model.DefaultDuration mins</span>
+                                <i class="bi bi-tag"></i>
+                                <span>ID: @Model.MeetingTypeId</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                @if (Model.IsActive)
-                {
-                    <span class="status-badge">
-                        <i class="bi bi-check-circle-fill"></i> Active
-                    </span>
-                }
-                else
-                {
-                    <span class="status-badge">
-                        <i class="bi bi-exclamation-circle-fill"></i> Inactive
-                    </span>
-                }
             </div>
 
             <!-- Details Grid -->
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-6">
                     <div class="info-card-premium">
                         <div class="card-label">
-                            <i class="bi bi-code-square"></i> Meeting Code
+                            <i class="bi bi-tag"></i> Meeting Type Name
                         </div>
-                        <p class="card-value">@Model.Code</p>
+                        <p class="card-value">@Model.MeetingTypeName</p>
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-4">
-                    <div class="info-card-premium">
-                        <div class="card-label">
-                            <i class="bi bi-clock"></i> Default Duration
-                        </div>
-                        <p class="card-value">@Model.DefaultDuration <span style="font-size: 1rem;">minutes</span></p>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-6">
                     <div class="info-card-premium">
                         <div class="card-label">
                             <i class="bi bi-calendar-event"></i> Created Date
                         </div>
-                        <p class="card-value" style="font-size: 1.1rem;">@Model.CreatedDate.ToString("MMM dd, yyyy")</p>
+                        <p class="card-value" style="font-size: 1.1rem;">@Model.Created.ToString("MMM dd, yyyy")</p>
                     </div>
                 </div>
             </div>
 
             <!-- Description -->
-            @if (!string.IsNullOrEmpty(Model.Description))
+            @if (!string.IsNullOrEmpty(Model.Remarks))
             {
                 <div class="card mb-4" style="animation: fadeInUp 0.6s ease-out 0.4s backwards;">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Description</h5>
-                        <p class="card-text text-muted" style="line-height: 1.8;">@Model.Description</p>
+                        <h5 class="card-title mb-3">Remarks</h5>
+                        <p class="card-text text-muted" style="line-height: 1.8;">@Model.Remarks</p>
                     </div>
                 </div>
             }
@@ -287,7 +262,7 @@
                 <a href="@Url.Action("Index", "MeetingType")" class="btn-action btn-back">
                     <i class="bi bi-arrow-left"></i> Back to List
                 </a>
-                <a href="@Url.Action("Edit", "MeetingType", new { id = Model.Id })" class="btn-action btn-edit">
+                <a href="@Url.Action("Edit", "MeetingType", new { id = Model.MeetingTypeId })" class="btn-action btn-edit">
                     <i class="bi bi-pencil"></i> Edit Type
                 </a>
             </div>

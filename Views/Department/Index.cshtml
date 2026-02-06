@@ -1,9 +1,409 @@
-@model IEnumerable<MOM.Models.Department>
+@model System.Data.DataTable
 
 @{
     ViewData["Title"] = "Departments Management";
 }
 
+<style>
+    /* Animations - No conflicts with existing styles */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .dept-page .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .dept-page .animate-slideInRight {
+        animation: slideInRight 0.5s ease-out forwards;
+    }
+
+    /* Stat Cards - Scoped to department page */
+    .dept-page .stat-card {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none !important;
+    }
+
+    .dept-page .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .dept-page .stat-card-info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .dept-page .stat-card-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .dept-page .stat-card-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    /* Table Rows - Enhanced without breaking existing table styles */
+    .dept-page .dept-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+
+    .dept-page .dept-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Action Buttons - Scoped styling */
+    .dept-page .btn-action {
+        transition: all 0.3s ease;
+        border: none !important;
+        padding: 6px 10px !important;
+        border-radius: 6px !important;
+    }
+
+    .dept-page .btn-action:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Modern Badges - Non-conflicting */
+    .dept-page .badge-modern {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .dept-page .badge-modern:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Card Modern - Scoped to prevent conflicts */
+    .dept-page .card-modern {
+        border: none !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: visible;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .dept-page .card-modern:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Gradient Text */
+    .dept-page .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    /* Icon Circles */
+    .dept-page .icon-circle {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Department Icon in Table */
+    .dept-page .dept-icon {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        transition: all 0.3s ease;
+    }
+
+    .dept-page .dept-icon:hover {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    /* ID Badge */
+    .dept-page .id-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 12px rgba(94, 114, 228, 0.3);
+    }
+
+    /* Table Header - Properly styled */
+    .dept-page .dept-table thead tr {
+        background: #918dd4 !important;
+        border: none !important;
+    }
+
+    .dept-page .dept-table thead th {
+        border: none !important;
+        padding: 12px 14px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        font-size: 0.8rem !important;
+        text-transform: none !important;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        background: transparent !important;
+    }
+
+    .dept-page .dept-table thead th:first-child {
+        border-top-left-radius: 12px !important;
+    }
+
+    .dept-page .dept-table thead th:last-child {
+        border-top-right-radius: 12px !important;
+    }
+
+    .dept-page .dept-table thead {
+        visibility: visible !important;
+        display: table-header-group !important;
+    }
+
+    .dept-page .dept-table tbody td {
+        padding: 12px 14px !important;
+        vertical-align: middle !important;
+        border: none !important;
+        font-size: 0.85rem;
+        background: #ffffff !important;
+    }
+
+    /* Pagination Styles */
+    .dept-page .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .dept-page .pagination {
+        margin: 0;
+    }
+
+    .dept-page .pagination .page-link {
+        border: none;
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #667eea;
+        font-weight: 600;
+        padding: 8px 14px;
+        transition: all 0.3s ease;
+    }
+
+    .dept-page .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .dept-page .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .dept-page .pagination .page-item.disabled .page-link {
+        background: transparent;
+        color: #ccc;
+    }
+
+    .dept-page .rows-per-page {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dept-page .rows-per-page label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .dept-page .rows-per-page select {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 6px 32px 6px 12px;
+        font-weight: 600;
+        color: #667eea;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background-color: white;
+        cursor: pointer;
+        min-width: 100px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+
+    .dept-page .rows-per-page select:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.02);
+    }
+
+    .dept-page .rows-per-page select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .dept-page .search-box {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+    .dept-page .search-box:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .dept-page .table-controls {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Modern Add Button */
+    .dept-page .btn-add-new {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dept-page .btn-add-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+
+    .dept-page .btn-add-new i {
+        font-size: 1.1rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .dept-page .dept-table tbody tr:hover {
+            transform: none;
+        }
+        
+        .dept-page .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .dept-page .pagination-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .dept-page .pagetitle > .d-flex {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch !important;
+        }
+
+        .dept-page .btn-add-new {
+            width: 100%;
+            justify-content: center;
+            padding: 14px 24px;
+            font-size: 1rem;
+        }
+
+        .dept-page .table-controls {
+            padding: 12px 15px;
+        }
+
+        .dept-page .dept-table thead th {
+            font-size: 0.7rem !important;
+            padding: 8px 6px !important;
+        }
+
+        .dept-page .dept-table tbody td {
+            font-size: 0.75rem;
+            padding: 10px 6px !important;
+        }
+
+        .dept-page .badge-modern {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+        }
+
+        .dept-page .btn-action {
+            padding: 4px 7px !important;
+        }
+
+        .dept-page .id-badge {
+            width: 32px;
+            height: 32px;
+            font-size: 0.75rem;
+        }
+
+        .dept-page .dept-icon {
+            width: 30px;
+            height: 30px;
+        }
+    }
+</style>
+
+<div class="dept-page">
 <div class="pagetitle">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -15,8 +415,9 @@
                 </ol>
             </nav>
         </div>
-        <a href="@Url.Action("Create", "Department")" class="btn btn-primary btn-lg">
-            <i class="bi bi-plus-circle me-2"></i> Add New Department
+        <a href="@Url.Action("Create", "Department")" class="btn btn-add-new">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add Department</span>
         </a>
     </div>
 </div><!-- End Page Title -->
@@ -35,111 +436,124 @@
             </div>
         }
 
-        <!-- Stats Cards -->
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card sales-card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Departments</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-diagram-3"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>6</h6>
-                            <span class="text-success small pt-1 fw-bold">Active</span>
-                        </div>
+        <!-- Stats Cards with Gradient and Animation -->
+        <div class="col-xxl-4 col-md-6 mb-4 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <div class="stat-card stat-card-success rounded-4 shadow-lg p-4 text-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Total Departments</p>
+                        <h2 class="mb-0 fw-bold display-5">@(Model?.Rows.Count ?? 0)</h2>
+                    </div>
+                    <div class="icon-circle">
+                        <i class="bi bi-diagram-3 fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xxl-3 col-md-6">
-            <div class="card info-card revenue-card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Staff</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6>45</h6>
-                            <span class="text-info small pt-1 fw-bold">Members</span>
+        <!-- Main Table with Modern Design -->
+        <div class="col-12 animate-fadeInUp" style="animation-delay: 0.5s;">
+            <div class="card-modern">
+                <div class="card-body pt-4 pb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+                        <h5 class="gradient-text fw-bold fs-4 mb-0">
+                            <i class="bi bi-folder-fill me-2"></i>Department Directory
+                        </h5>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rows-per-page">
+                                <label class="text-muted small mb-0">Show:</label>
+                                <select id="deptRowsPerPage" class="form-select-sm">
+                                    <option value="5">5 rows</option>
+                                    <option value="10" selected>10 rows</option>
+                                    <option value="25">25 rows</option>
+                                    <option value="50">50 rows</option>
+                                    <option value="-1">All</option>
+                                </select>
+                            </div>
+                            <div class="badge-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                @(Model?.Rows.Count ?? 0) Total
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Table -->
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-4">
-                    <h5 class="card-title mb-4">Department Directory</h5>
+                    <!-- Search Bar -->
+                    <div class="table-controls">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 search-box" 
+                                           id="deptSearchInput" placeholder="Search departments..." 
+                                           style="border-left: none !important;">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end">
+                                    <span class="text-muted small" id="deptPageInfoTop"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover datatable">
-                            <thead class="table-light">
+                        <table class="table dept-table mb-0">
+                            <thead>
                                 <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Manager</th>
-                                    <th scope="col">Members</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Created Date</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Actions</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Department</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col" class="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @if (Model != null && Model.Any())
+                            <tbody id="departmentTableBody">
+                                @if (Model != null && Model.Rows.Count > 0)
                                 {
-                                    foreach (var department in Model)
+                                    var index = 0;
+                                    foreach (System.Data.DataRow row in Model.Rows)
                                     {
-                                        <tr>
-                                            <td>@department.Id</td>
-                                            <td><strong>@department.Name</strong></td>
-                                            <td>@department.Manager</td>
+                                        index++;
+                                        <tr class="animate-slideInRight" style="animation-delay: @(0.6 + (index * 0.05))s;">
                                             <td>
-                                                <span class="badge bg-info">@department.EmployeeCount</span>
+                                                <div class="id-badge">
+                                                    @row["DepartmentID"]
+                                                </div>
                                             </td>
                                             <td>
-                                                @if (!string.IsNullOrEmpty(department.Description) && department.Description.Length > 50)
-                                                {
-                                                    @department.Description.Substring(0, 50)<text>...</text>
-                                                }
-                                                else
-                                                {
-                                                    @department.Description
-                                                }
-                                            </td>
-                                            <td>@department.CreatedDate.ToString("MMM dd, yyyy")</td>
-                                            <td>
-                                                @if (department.IsActive)
-                                                {
-                                                    <span class="badge bg-success">Active</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                }
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="dept-icon">
+                                                        <i class="bi bi-diagram-3" style="color: #667eea; font-size: 0.9rem;"></i>
+                                                    </div>
+                                                    <span class="text-dark" style="font-size: 0.875rem; font-weight: 500;">@row["DepartmentName"]</span>
+                                                </div>
                                             </td>
                                             <td>
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <a href="@Url.Action("Details", "Department", new { id = department.Id })" 
-                                                       class="btn btn-outline-info" 
+                                                <div class="d-flex align-items-center gap-1 text-secondary">
+                                                    <i class="bi bi-calendar3" style="font-size: 0.8rem;"></i>
+                                                    <span style="font-size: 0.75rem;">@Convert.ToDateTime(row["Created"]).ToString("MMM dd, yyyy")</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1 justify-content-center">
+                                                    <a href="@Url.Action("Details", "Department", new { id = row["DepartmentID"] })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;"
                                                        title="View Details">
-                                                        <i class="bi bi-eye"></i>
+                                                        <i class="bi bi-eye-fill"></i>
                                                     </a>
-                                                    <a href="@Url.Action("Edit", "Department", new { id = department.Id })" 
-                                                       class="btn btn-outline-primary" 
+                                                    <a href="@Url.Action("Edit", "Department", new { id = row["DepartmentID"] })" 
+                                                       class="btn btn-sm btn-action" 
+                                                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;"
                                                        title="Edit">
-                                                        <i class="bi bi-pencil"></i>
+                                                        <i class="bi bi-pencil-fill"></i>
                                                     </a>
                                                     <button type="button" 
-                                                            class="btn btn-outline-danger" 
-                                                            onclick="confirmDelete(@department.Id, '@department.Name')"
+                                                            class="btn btn-sm btn-action" 
+                                                            style="background: linear-gradient(135deg, #f5576c 0%, #fa709a 100%); color: white;"
+                                                            onclick="confirmDelete(@row["DepartmentID"], '@row["DepartmentName"]')"
                                                             title="Delete">
-                                                        <i class="bi bi-trash"></i>
+                                                        <i class="bi bi-trash-fill"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -149,10 +563,17 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="8" class="text-center">
-                                            <div class="alert alert-info mb-0" role="alert">
-                                                <i class="bi bi-info-circle me-1"></i>
-                                                No departments found. Click "Add New Department" to create one.
+                                        <td colspan="8" class="text-center py-5">
+                                            <div class="animate-fadeInUp" style="animation-delay: 0.6s;">
+                                                <div class="mb-3">
+                                                    <i class="bi bi-inbox" style="font-size: 3.5rem; color: #667eea; opacity: 0.4;"></i>
+                                                </div>
+                                                <h5 class="text-secondary mb-2">No Departments Found</h5>
+                                                <p class="text-muted small mb-4">Start by creating your first department</p>
+                                                <a href="@Url.Action("Create", "Department")" class="btn rounded-pill" 
+                                                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 32px; font-weight: 600;">
+                                                    <i class="bi bi-plus-circle me-2"></i>Add New Department
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -161,12 +582,22 @@
                         </table>
                     </div>
 
+                    <!-- Pagination Footer -->
+                    <div class="pagination-wrapper mt-3 pt-3" style="border-top: 1px solid #f0f0f0;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small" id="deptPageInfo"></span>
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0" id="deptPagination"></ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
 </section>
+</div><!-- End dept-page -->
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
@@ -193,6 +624,162 @@
 
 @section Scripts {
     <script>
+        // Pagination functionality for Department table
+        let deptCurrentPage = 1;
+        let deptRowsPerPage = 10;
+        let deptAllRows = [];
+        let deptFilteredRows = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('departmentTableBody');
+            if (tableBody) {
+                deptAllRows = Array.from(tableBody.getElementsByTagName('tr'));
+                deptFilteredRows = deptAllRows;
+                
+                // Initialize pagination
+                const rowsSelect = document.getElementById('deptRowsPerPage');
+                if (rowsSelect) {
+                    rowsSelect.addEventListener('change', function() {
+                        deptRowsPerPage = parseInt(this.value);
+                        deptCurrentPage = 1;
+                        displayDeptPage(deptCurrentPage);
+                    });
+                }
+                
+                // Search functionality
+                const searchInput = document.getElementById('deptSearchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('keyup', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        deptFilteredRows = deptAllRows.filter(row => {
+                            const text = row.textContent.toLowerCase();
+                            return text.includes(searchTerm);
+                        });
+                        deptCurrentPage = 1;
+                        displayDeptPage(deptCurrentPage);
+                    });
+                }
+                
+                displayDeptPage(deptCurrentPage);
+            }
+        });
+
+        function displayDeptPage(page) {
+            const start = (page - 1) * deptRowsPerPage;
+            const end = deptRowsPerPage === -1 ? deptFilteredRows.length : start + deptRowsPerPage;
+            
+            // Hide all rows
+            deptAllRows.forEach(row => row.style.display = 'none');
+            
+            // Show only rows for current page
+            const rowsToShow = deptRowsPerPage === -1 ? deptFilteredRows : deptFilteredRows.slice(start, end);
+            rowsToShow.forEach(row => row.style.display = '');
+            
+            // Update page info
+            const totalRows = deptFilteredRows.length;
+            const showingStart = totalRows === 0 ? 0 : start + 1;
+            const showingEnd = Math.min(end, totalRows);
+            const infoText = `Showing ${showingStart} to ${showingEnd} of ${totalRows} entries`;
+            const pageInfoEl = document.getElementById('deptPageInfo');
+            const pageInfoTopEl = document.getElementById('deptPageInfoTop');
+            if (pageInfoEl) {
+                pageInfoEl.textContent = infoText;
+            }
+            if (pageInfoTopEl) {
+                pageInfoTopEl.textContent = infoText;
+            }
+            
+            // Update pagination buttons
+            updateDeptPagination();
+        }
+
+        function updateDeptPagination() {
+            const totalPages = deptRowsPerPage === -1 ? 1 : Math.ceil(deptFilteredRows.length / deptRowsPerPage);
+            const paginationEl = document.getElementById('deptPagination');
+            if (!paginationEl) return;
+            
+            paginationEl.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${deptCurrentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changeDeptPage(${deptCurrentPage - 1}); return false;">
+                <i class="bi bi-chevron-left"></i>
+            </a>`;
+            paginationEl.appendChild(prevLi);
+            
+            // Page numbers
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, deptCurrentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            if (endPage - startPage < maxPagesToShow - 1) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            
+            // First page
+            if (startPage > 1) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeDeptPage(1); return false;">1</a>`;
+                paginationEl.appendChild(li);
+                
+                if (startPage > 2) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<a class="page-link">...</a>';
+                    paginationEl.appendChild(dots);
+                }
+            }
+            
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === deptCurrentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeDeptPage(${i}); return false;">${i}</a>`;
+                paginationEl.appendChild(li);
+            }
+            
+            // Last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<a class="page-link">...</a>';
+                    paginationEl.appendChild(dots);
+                }
+                
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeDeptPage(${totalPages}); return false;">${totalPages}</a>`;
+                paginationEl.appendChild(li);
+            }
+            
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${deptCurrentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changeDeptPage(${deptCurrentPage + 1}); return false;">
+                <i class="bi bi-chevron-right"></i>
+            </a>`;
+            paginationEl.appendChild(nextLi);
+        }
+
+        function changeDeptPage(page) {
+            const totalPages = deptRowsPerPage === -1 ? 1 : Math.ceil(deptFilteredRows.length / deptRowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            deptCurrentPage = page;
+            displayDeptPage(deptCurrentPage);
+            
+            // Smooth scroll to table
+            const tableCard = document.querySelector('.dept-page .card-modern');
+            if (tableCard) {
+                tableCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Delete confirmation
         function confirmDelete(id, name) {
             document.getElementById('departmentName').textContent = name;
             var form = document.getElementById('deleteForm');

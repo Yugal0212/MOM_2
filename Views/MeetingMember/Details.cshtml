@@ -1,0 +1,325 @@
+@model MeetingMember
+
+@{
+    ViewData["Title"] = "Meeting Member Details";
+}
+
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .details-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .member-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-text .position {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .info-card-modern {
+        background: white;
+        border-radius: 16px;
+        padding: 1.8rem;
+        height: 100%;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .info-card-modern .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-card-modern .label {
+        font-size: 0.875rem;
+        color: #8b92a7;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card-modern .value {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 80%;
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-modern {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-modern.btn-back {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-modern.btn-edit {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .btn-modern.btn-delete {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        .hero-text h1 { font-size: 1.8rem; }
+        .action-buttons { flex-direction: column; }
+        .btn-modern { width: 100%; }
+    }
+</style>
+
+<div class="pagetitle">
+    <h1>Meeting Member Details</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "MeetingMember")">Meeting Members</a></li>
+            <li class="breadcrumb-item active">Details</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Hero Section -->
+            <div class="details-hero">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>Member Attendance</h1>
+                        <div class="position"><i class="bi bi-hash me-2"></i>ID: @Model.MeetingMemberId</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meeting and Staff Info -->
+            <div class="section-title">Details</div>
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <div class="label">Meeting ID</div>
+                        <h3 class="value">@Model.MeetingId</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="label">Staff ID</div>
+                        <h3 class="value">@Model.StaffId</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="info-card-modern">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="label">Is Present</div>
+                        <h3 class="value">
+                            @if (Model.IsPresent)
+                            {
+                                <span class="badge bg-success">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">No</span>
+                            }
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remarks -->
+            @if (!string.IsNullOrEmpty(Model.Remarks))
+            {
+                <div class="section-title">Remarks</div>
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <div class="info-card-modern">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <div class="label">Notes</div>
+                            <p class="value" style="font-size: 1rem; font-weight: 400; white-space: pre-wrap;">@Model.Remarks</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="@Url.Action("Index", "MeetingMember")" class="btn-modern btn-back">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+                <a href="@Url.Action("Edit", "MeetingMember", new { id = Model.MeetingMemberId })" class="btn-modern btn-edit">
+                    <i class="bi bi-pencil me-2"></i> Edit Member
+                </a>
+                <button type="button" class="btn-modern btn-delete" onclick="confirmDelete(@Model.MeetingMemberId, 'ID @Model.MeetingMemberId')">
+                    <i class="bi bi-trash me-2"></i> Delete Member
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <span id="memberName"></span>?
+                <br />
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('memberName').textContent = name;
+            var form = document.getElementById('deleteForm');
+            form.action = '@Url.Action("Delete", "MeetingMember")/' + id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}

@@ -1,4 +1,4 @@
-@model Venue
+@model MeetingVenue
 
 @{
     ViewData["Title"] = "Venue Details";
@@ -181,21 +181,6 @@
         color: white;
     }
 
-    .equipment-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-    }
-
-    .equipment-tag {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
     @@media (max-width: 768px) {
         .hero-content {
             flex-direction: column;
@@ -225,20 +210,13 @@
             <div class="details-hero">
                 <div class="hero-content">
                     <div class="venue-icon">
-                        @if (Model.VenueType == "Physical")
-                        {
-                            <i class="bi bi-building"></i>
-                        }
-                        else
-                        {
-                            <i class="bi bi-broadcast"></i>
-                        }
+                        <i class="bi bi-building"></i>
                     </div>
                     <div class="hero-text">
-                        <h1>@Model.Name</h1>
+                        <h1>@Model.MeetingVenueName</h1>
                         <span class="type-badge">
-                            <i class="bi @(Model.VenueType == "Physical" ? "bi-geo-alt" : "bi-broadcast") me-2"></i>
-                            @Model.VenueType Venue
+                            <i class="bi bi-info-circle me-2"></i>
+                            Active
                         </span>
                     </div>
                 </div>
@@ -247,103 +225,33 @@
             <!-- Basic Information -->
             <div class="section-title">Venue Information</div>
             <div class="row g-4 mb-4">
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-4">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
-                            <i class="bi bi-geo-alt"></i>
+                            <i class="bi bi-hash"></i>
                         </div>
-                        <div class="label">Location</div>
-                        <h3 class="value" style="font-size: 1.1rem;">@Model.Location</h3>
+                        <div class="label">ID</div>
+                        <h3 class="value">@Model.MeetingVenueId</h3>
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-4">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
-                            <i class="bi bi-people"></i>
+                            <i class="bi bi-calendar-check"></i>
                         </div>
-                        <div class="label">Capacity</div>
-                        <h3 class="value">@(Model.VenueType == "Virtual" ? "Unlimited" : Model.Capacity + " persons")</h3>
+                        <div class="label">Created On</div>
+                        <h3 class="value">@Model.Created.ToString("MMM dd, yyyy")</h3>
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-4">
                     <div class="info-card-modern">
                         <div class="icon-wrapper">
-                            <i class="bi bi-building"></i>
+                            <i class="bi bi-clock-history"></i>
                         </div>
-                        <div class="label">Building</div>
-                        <h3 class="value" style="font-size: 1.1rem;">@(Model.Building ?? "N/A")</h3>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-3">
-                    <div class="info-card-modern">
-                        <div class="icon-wrapper">
-                            <i class="bi bi-door-closed"></i>
-                        </div>
-                        <div class="label">Room Number</div>
-                        <h3 class="value" style="font-size: 1.1rem;">@(Model.RoomNumber ?? "N/A")</h3>
-                    </div>
-                </div>
-            </div>
-
-            @if (Model.VenueType == "Virtual" && !string.IsNullOrEmpty(Model.MeetingLink))
-            {
-                <div class="section-title">Virtual Meeting Details</div>
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-8">
-                        <div class="info-card-modern">
-                            <div class="icon-wrapper">
-                                <i class="bi bi-link-45deg"></i>
-                            </div>
-                            <div class="label">Meeting Link</div>
-                            <p style="margin-bottom: 1rem;">
-                                <a href="@Model.MeetingLink" target="_blank" rel="noopener noreferrer">
-                                    @Model.MeetingLink
-                                </a>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @if (!string.IsNullOrEmpty(Model.Equipment))
-            {
-                <div class="section-title">Equipment & Facilities</div>
-                <div class="row mb-4">
-                    <div class="col-lg-12">
-                        <div class="equipment-list">
-                            @foreach (var equipment in Model.Equipment.Split(','))
-                            {
-                                <span class="equipment-tag">
-                                    <i class="bi bi-check-circle-fill me-1"></i>
-                                    @equipment.Trim()
-                                </span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-
-            <!-- Status -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="info-card-modern">
-                        <div class="icon-wrapper">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <div class="label">Status</div>
-                        <h3 class="value">
-                            @if (Model.IsActive)
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-warning">Inactive</span>
-                            }
-                        </h3>
+                        <div class="label">Last Modified</div>
+                        <h3 class="value">@Model.Modified.ToString("MMM dd, yyyy")</h3>
                     </div>
                 </div>
             </div>
@@ -353,10 +261,10 @@
                 <a href="@Url.Action("Index", "Venue")" class="btn-modern btn-back">
                     <i class="bi bi-arrow-left me-2"></i> Back to List
                 </a>
-                <a href="@Url.Action("Edit", "Venue", new { id = Model.Id })" class="btn-modern btn-edit">
+                <a href="@Url.Action("Edit", "Venue", new { id = Model.MeetingVenueId })" class="btn-modern btn-edit">
                     <i class="bi bi-pencil me-2"></i> Edit Venue
                 </a>
-                <button type="button" class="btn-modern btn-delete" onclick="confirmDelete(@Model.Id, '@Model.Name')">
+                <button type="button" class="btn-modern btn-delete" onclick="confirmDelete(@Model.MeetingVenueId, '@Model.MeetingVenueName')">
                     <i class="bi bi-trash me-2"></i> Delete Venue
                 </button>
             </div>

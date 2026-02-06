@@ -1,0 +1,68 @@
+@model MOM.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<div class="text-center mb-4">
+    <h2 class="fw-bold" style="color: #333;">Create Account</h2>
+    <p class="text-muted">Join us to manage your meetings effectively</p>
+</div>
+
+<form asp-controller="Account" asp-action="Register" method="post" class="needs-validation" novalidate>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 0.9rem;"></div>
+    
+    <div class="mb-3">
+        <label asp-for="FullName" class="form-label">Full Name</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input asp-for="FullName" class="form-control" placeholder="John Doe" required autocomplete="name" />
+        </div>
+        <span asp-validation-for="FullName" class="text-danger" style="font-size: 0.8rem;"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email Address</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input asp-for="Email" class="form-control" placeholder="name@example.com" required autocomplete="email" />
+        </div>
+        <span asp-validation-for="Email" class="text-danger" style="font-size: 0.8rem;"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Password</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input asp-for="Password" class="form-control" placeholder="Min. 6 characters" required autocomplete="new-password" />
+        </div>
+        <span asp-validation-for="Password" class="text-danger" style="font-size: 0.8rem;"></span>
+    </div>
+
+    <div class="mb-4">
+        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+            <input asp-for="ConfirmPassword" class="form-control" placeholder="Re-enter password" required autocomplete="new-password" />
+        </div>
+        <span asp-validation-for="ConfirmPassword" class="text-danger" style="font-size: 0.8rem;"></span>
+    </div>
+
+    <div class="d-grid mb-3">
+        <button class="btn btn-primary btn-lg" type="submit">
+            Create Account
+        </button>
+    </div>
+    
+    <div class="auth-footer">
+        <p class="mb-0">
+            Already have an account? 
+            <a asp-controller="Account" asp-action="Login">Sign In</a>
+        </p>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -251,118 +251,19 @@
             <!-- Form Card -->
             <div class="form-card-modern">
                 <form asp-action="Edit" method="post">
-                    <input asp-for="Id" type="hidden" />
-
-                    <!-- Basic Information Section -->
-                    <div class="form-section-title">
-                        <i class="bi bi-info-circle-fill"></i>
-                        Basic Information
-                    </div>
+                    <input asp-for="DepartmentId" type="hidden" />
 
                     <div class="row g-4 mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <div class="form-group-modern">
-                                <label asp-for="Name" class="form-label-modern">
+                                <label asp-for="DepartmentName" class="form-label-modern">
                                     <i class="bi bi-building"></i>
                                     Department Name
                                 </label>
-                                <input asp-for="Name" class="form-control form-control-modern" placeholder="Enter department name" required />
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                                <input asp-for="DepartmentName" class="form-control form-control-modern" placeholder="Enter department name" required />
+                                <span asp-validation-for="DepartmentName" class="text-danger"></span>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group-modern">
-                                <label asp-for="Code" class="form-label-modern">
-                                    <i class="bi bi-hash"></i>
-                                    Department Code
-                                </label>
-                                <input asp-for="Code" class="form-control form-control-modern" placeholder="Enter unique code (e.g., DEPT-001)" required />
-                                <span asp-validation-for="Code" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Management Information Section -->
-                    <div class="form-section-title">
-                        <i class="bi bi-person-badge-fill"></i>
-                        Management & Resources
-                    </div>
-
-                    <div class="field-group">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label asp-for="Manager" class="form-label-modern">
-                                        <i class="bi bi-person-circle"></i>
-                                        Manager Name
-                                    </label>
-                                    <input asp-for="Manager" class="form-control form-control-modern" placeholder="Enter manager name" />
-                                    <span asp-validation-for="Manager" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group-modern">
-                                    <label asp-for="EmployeeCount" class="form-label-modern">
-                                        <i class="bi bi-people"></i>
-                                        Employee Count
-                                    </label>
-                                    <input asp-for="EmployeeCount" type="number" class="form-control form-control-modern" placeholder="0" min="0" />
-                                    <span asp-validation-for="EmployeeCount" class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Timeline & Status Section -->
-                    <div class="form-section-title">
-                        <i class="bi bi-calendar-event-fill"></i>
-                        Timeline & Status
-                    </div>
-
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-6">
-                            <div class="form-group-modern">
-                                <label asp-for="CreatedDate" class="form-label-modern">
-                                    <i class="bi bi-calendar-check"></i>
-                                    Created Date
-                                </label>
-                                <input asp-for="CreatedDate" type="date" class="form-control form-control-modern" />
-                                <span asp-validation-for="CreatedDate" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group-modern">
-                                <label class="form-label-modern">
-                                    <i class="bi bi-toggle-on"></i>
-                                    Department Status
-                                </label>
-                                <div class="switch-container">
-                                    <label class="switch-label">
-                                        <i class="bi bi-power"></i>
-                                        Active Department
-                                    </label>
-                                    <input asp-for="IsActive" class="form-check-input form-check-input-modern" type="checkbox" role="switch" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Description Section -->
-                    <div class="form-section-title">
-                        <i class="bi bi-file-text-fill"></i>
-                        Description
-                    </div>
-
-                    <div class="form-group-modern">
-                        <label asp-for="Description" class="form-label-modern">
-                            <i class="bi bi-chat-text"></i>
-                            Department Description
-                        </label>
-                        <textarea asp-for="Description" class="form-control form-control-modern" rows="5" placeholder="Enter detailed description of the department's role, responsibilities, and objectives..."></textarea>
-                        <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <!-- Form Actions -->

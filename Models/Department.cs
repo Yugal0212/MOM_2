@@ -1,34 +1,21 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MOM.Models
 {
+    [Table("MOM_Department")]
     public class Department
     {
-        public int Id { get; set; }
+        [Key]
+        public int DepartmentId { get; set; }
 
         [Required]
-        [Display(Name = "Department Name")]
-        public string Name { get; set; } = string.Empty;
+        [StringLength(100)]
+        public string DepartmentName { get; set; }
 
-        [Required]
-        [Display(Name = "Department Code")]
-        public string Code { get; set; } = string.Empty;
+        public DateTime Created { get; set; } = DateTime.Now;
 
-        [Display(Name = "Description")]
-        public string Description { get; set; } = string.Empty;
-
-        [Display(Name = "Manager")]
-        public string Manager { get; set; } = string.Empty;
-
-        [Display(Name = "Employee Count")]
-        public int EmployeeCount { get; set; }
-
-        [Display(Name = "Created Date")]
-        [DataType(DataType.Date)]
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
-
-        [Display(Name = "Is Active")]
-        public bool IsActive { get; set; } = true;
+        public DateTime Modified { get; set; } = DateTime.Now;
     }
 }

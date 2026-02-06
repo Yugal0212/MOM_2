@@ -1,9 +1,450 @@
-@model List<MeetingType>
+@model System.Data.DataTable
 
 @{
     ViewData["Title"] = "Meeting Types Management";
 }
 
+<style>
+    .meeting-type-page { overflow-x: hidden; }
+
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes slideInRight {
+        from { opacity: 0; transform: translateX(-15px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
+    .animate-slideInRight { animation: slideInRight 0.4s ease-out forwards; }
+
+    .stat-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stat-card-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+    .stat-card-danger { background: linear-gradient(135deg, #f5576c 0%, #fa709a 100%); }
+
+    .modern-table {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .modern-table thead tr { 
+        background: #918dd4 !important; 
+        border: none !important;
+    }
+
+    .modern-table thead th {
+        border: none !important;
+        padding: 10px 12px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        font-size: 0.75rem !important;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        text-transform: none !important;
+        background: transparent !important;
+    }
+
+    .modern-table thead th:first-child {
+        border-top-left-radius: 12px !important;
+    }
+
+    .modern-table thead th:last-child {
+        border-top-right-radius: 12px !important;
+    }
+
+    .modern-table thead {
+        visibility: visible !important;
+        display: table-header-group !important;
+    }
+
+    .modern-table tbody td {
+        padding: 12px 10px;
+        vertical-align: middle;
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.8rem;
+    }
+
+    .modern-table tbody tr { transition: all 0.3s ease; }
+
+    .modern-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.04) 0%, rgba(118, 75, 162, 0.04) 100%);
+        transform: translateX(5px);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .card-modern {
+        overflow: visible !important;
+    }
+
+    .badge-modern {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        transition: transform 0.3s ease;
+    }
+
+    .badge-modern:hover { transform: scale(1.05); }
+
+    .btn-action {
+        transition: all 0.3s ease;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .btn-action:hover {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .type-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        transition: all 0.3s ease;
+    }
+
+    .type-icon:hover { transform: rotate(10deg) scale(1.1); }
+
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 0;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .table-header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .right-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .total-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .search-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-wrapper i.bi-search {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .search-wrapper .clear-search {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        padding: 4px;
+        display: none;
+        transition: all 0.3s ease;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-wrapper .clear-search:hover {
+        background: #f0f0f0;
+        color: #667eea;
+    }
+
+    .search-wrapper .clear-search.active {
+        display: flex;
+    }
+
+    .pagination { margin: 0; }
+
+    .pagination .page-link {
+        border: none;
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #667eea;
+        font-weight: 600;
+        padding: 8px 14px;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .rows-per-page {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rows-per-page label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .rows-per-page select {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 6px 32px 6px 12px;
+        font-weight: 600;
+        color: #667eea;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background-color: white;
+        cursor: pointer;
+        min-width: 100px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+
+    .rows-per-page select:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.02);
+    }
+
+    .rows-per-page select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .table-controls {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        width: 100%;
+        padding-left: 40px;
+        padding-right: 40px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        height: 42px;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+    .search-box:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .search-box:focus + i.bi-search {
+        color: #667eea;
+    }
+
+    .search-box::placeholder {
+        color: #999;
+        font-weight: 400;
+    }
+
+    .search-box.border-start-0 { border-left: none; }
+
+    .table-responsive { overflow-x: auto; }
+    .icon-circle { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; }
+
+    .card-modern {
+        border: none !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .card-modern:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+
+    /* Modern Add Button */
+    .btn-add-new {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+
+    .btn-add-new i {
+        font-size: 1.1rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .pagetitle > .d-flex {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch !important;
+        }
+
+        .btn-add-new {
+            width: 100%;
+            justify-content: center;
+            padding: 14px 24px;
+            font-size: 1rem;
+        }
+
+        .table-header-controls {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .right-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .rows-per-page {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .rows-per-page select {
+            flex: 1;
+        }
+
+        .total-badge {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .search-section {
+            flex-direction: column;
+        }
+
+        .search-wrapper {
+            max-width: 100%;
+        }
+
+        .modern-table thead th {
+            font-size: 0.7rem !important;
+            padding: 8px 6px !important;
+        }
+
+        .modern-table tbody td {
+            font-size: 0.75rem;
+            padding: 10px 6px !important;
+        }
+
+        .badge-modern {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+        }
+
+        .btn-action {
+            padding: 5px 8px !important;
+            font-size: 0.75rem;
+        }
+
+        .stat-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+
+<div class="meeting-type-page">
 <div class="pagetitle">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -15,15 +456,16 @@
                 </ol>
             </nav>
         </div>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i> Add New Type
+        <a asp-action="Create" class="btn btn-add-new">
+            <i class="bi bi-plus-circle"></i>
+            <span>Add New Type</span>
         </a>
     </div>
 </div>
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert" style="animation: slideInDown 0.5s ease-out;">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-check-circle me-2"></i>
         @TempData["Success"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -32,116 +474,101 @@
 
 <section class="section">
     <!-- Stats Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6 col-lg-4">
-            <div class="card info-card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Types</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); color: #667eea;">
-                            <i class="bi bi-tags fs-5"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6 class="mb-0" style="font-size: 2rem; font-weight: 700;">@Model.Count</h6>
-                            <span class="text-muted small">All meeting types</span>
-                        </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 animate-fadeInUp" style="animation-delay: 0.1s;">
+            <div class="stat-card stat-card-primary text-white p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Total Types</p>
+                        <h2 class="mb-0 fw-bold">@Model.Rows.Count</h2>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card info-card">
-                <div class="card-body">
-                    <h5 class="card-title">Active Types</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%); color: #11998e;">
-                            <i class="bi bi-check-circle fs-5"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6 class="mb-0" style="font-size: 2rem; font-weight: 700;">@Model.Count(m => m.IsActive)</h6>
-                            <span class="text-muted small">In use</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card info-card">
-                <div class="card-body">
-                    <h5 class="card-title">Inactive Types</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background: linear-gradient(135deg, rgba(245, 87, 108, 0.1) 0%, rgba(250, 112, 154, 0.1) 100%); color: #f5576c;">
-                            <i class="bi bi-exclamation-circle fs-5"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h6 class="mb-0" style="font-size: 2rem; font-weight: 700;">@Model.Count(m => !m.IsActive)</h6>
-                            <span class="text-muted small">Archived</span>
-                        </div>
-                    </div>
+                    <div class="icon-circle"><i class="bi bi-tags fs-2"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Data Table Card -->
-    <div class="card">
-        <div class="card-body pt-4">
-            <h5 class="card-title mb-4">All Meeting Types</h5>
+    <div class="card card-modern animate-fadeInUp" style="animation-delay: 0.4s;">
+        <div class="card-body pt-4 pb-4">
+            <div class="table-header-controls">
+                <h5 class="gradient-text fw-bold fs-4 mb-0">
+                    <i class="bi bi-tags-fill me-2"></i>Meeting Types Directory
+                </h5>
+                <div class="right-controls">
+                    <div class="rows-per-page">
+                        <label>Show:</label>
+                        <select id="rowsPerPage" class="form-select form-select-sm">
+                            <option value="5">5 rows</option>
+                            <option value="10" selected>10 rows</option>
+                            <option value="25">25 rows</option>
+                            <option value="50">50 rows</option>
+                            <option value="-1">All</option>
+                        </select>
+                    </div>
+                    <span class="total-badge">@Model.Rows.Count Total</span>
+                </div>
+            </div>
 
-            @if (Model.Count == 0)
+            <div class="search-section">
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" class="form-control search-box" placeholder="Search meeting types...">
+                    <i class="bi bi-search"></i>
+                    <button type="button" class="clear-search" id="clearSearchBtn" title="Clear search">
+                        <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
+                    </button>
+                </div>
+                <span class="text-muted small fw-semibold" id="pageInfo">Showing all entries</span>
+            </div>
+
+            @if (Model.Rows.Count == 0)
             {
-                <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle me-2"></i>
-                    No meeting types found. <a asp-action="Create">Create one</a>
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #667eea; opacity: 0.4;"></i>
+                    <h5 class="text-secondary mt-3 mb-2">No Meeting Types Found</h5>
+                    <p class="text-muted small">Start by creating your first meeting type</p>
                 </div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-hover table-sm mb-0 modern-table" id="meetingTypesTable">
                         <thead>
                             <tr>
-                                <th scope="col">Type Name</th>
-                                <th scope="col">Code</th>
-                                <th scope="col">Description</th>
-                                <th scope="col">Duration</th>
-                                <th scope="col">Created Date</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Actions</th>
+                                <th>ID</th>
+                                <th>Type Name</th>
+                                <th>Remarks</th>
+                                <th>Created</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach (var item in Model)
+                        <tbody id="tableBody">
+                            @{
+                                var index = 0;
+                            }
+                            @foreach (System.Data.DataRow row in Model.Rows)
                             {
-                                <tr>
-                                    <td><strong>@item.Name</strong></td>
-                                    <td><span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">@item.Code</span></td>
-                                    <td><small>@(item.Description?.Length > 40 ? item.Description.Substring(0, 40) + "..." : item.Description)</small></td>
-                                    <td>@item.DefaultDuration <small>min</small></td>
-                                    <td><small>@item.CreatedDate.ToString("MMM dd, yyyy")</small></td>
+                                index++;
+                                <tr class="animate-slideInRight" style="animation-delay: @(0.5 + (index * 0.05))s;">
                                     <td>
-                                        @if (item.IsActive)
-                                        {
-                                            <span class="badge" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge" style="background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white;">Inactive</span>
-                                        }
+                                        <span class="badge-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                            @row["MeetingTypeID"]
+                                        </span>
                                     </td>
                                     <td>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="View Details">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-outline-danger" title="Delete" onclick="confirmDelete(@item.Id, '@item.Name')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                        <strong>@row["MeetingTypeName"]</strong>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@(row["Remarks"] != DBNull.Value && row["Remarks"].ToString().Length > 50 ? row["Remarks"].ToString().Substring(0, 50) + "..." : (row["Remarks"] != DBNull.Value ? row["Remarks"].ToString() : ""))</small>
+                                    </td>
+                                    <td>
+                                        <small>@Convert.ToDateTime(row["Created"]).ToString("MMM dd, yyyy")</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a asp-action="Details" asp-route-id="@row["MeetingTypeID"]" class="btn btn-sm btn-action" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" title="View"><i class="bi bi-eye-fill"></i></a>
+                                            <a asp-action="Edit" asp-route-id="@row["MeetingTypeID"]" class="btn btn-sm btn-action" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                                            <button type="button" class="btn btn-sm btn-action" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 6px 11px; border-radius: 6px; font-size: 0.8rem;" onclick="confirmDelete(@row["MeetingTypeID"], '@row["MeetingTypeName"]')" title="Delete"><i class="bi bi-trash-fill"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -149,10 +576,16 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper">
+                    <nav><ul class="pagination" id="pagination"></ul></nav>
+                </div>
             }
         </div>
     </div>
 </section>
+</div><!-- End meeting-type-page -->
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
@@ -179,6 +612,171 @@
 
 @section Scripts {
     <script>
+        // Pagination functionality
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let allRows = [];
+        let filteredRows = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('tableBody');
+            if (tableBody) {
+                allRows = Array.from(tableBody.getElementsByTagName('tr'));
+                filteredRows = allRows;
+                
+                // Initialize pagination controls
+                document.getElementById('rowsPerPage').addEventListener('change', function() {
+                    rowsPerPage = parseInt(this.value);
+                    currentPage = 1;
+                    displayPage(currentPage);
+                });
+                
+                // Search functionality
+                const searchInput = document.getElementById('searchInput');
+                const clearBtn = document.getElementById('clearSearchBtn');
+                if (searchInput) {
+                    searchInput.addEventListener('keyup', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        filteredRows = allRows.filter(row => {
+                            const text = row.textContent.toLowerCase();
+                            return text.includes(searchTerm);
+                        });
+                        currentPage = 1;
+                        displayPage(currentPage);
+                        
+                        // Toggle clear button
+                        if (clearBtn) {
+                            if (this.value.length > 0) {
+                                clearBtn.classList.add('active');
+                            } else {
+                                clearBtn.classList.remove('active');
+                            }
+                        }
+                    });
+                    
+                    // Clear button functionality
+                    if (clearBtn) {
+                        clearBtn.addEventListener('click', function() {
+                            searchInput.value = '';
+                            filteredRows = allRows;
+                            currentPage = 1;
+                            displayPage(currentPage);
+                            clearBtn.classList.remove('active');
+                            searchInput.focus();
+                        });
+                    }
+                }
+                
+                displayPage(currentPage);
+            }
+        });
+
+        function displayPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = rowsPerPage === -1 ? filteredRows.length : start + rowsPerPage;
+            
+            // Hide all rows
+            allRows.forEach(row => row.style.display = 'none');
+            
+            // Show only rows for current page
+            const rowsToShow = rowsPerPage === -1 ? filteredRows : filteredRows.slice(start, end);
+            rowsToShow.forEach(row => row.style.display = '');
+            
+            // Update page info
+            const totalRows = filteredRows.length;
+            const showingStart = totalRows === 0 ? 0 : start + 1;
+            const showingEnd = Math.min(end, totalRows);
+            const pageInfoEl = document.getElementById('pageInfo');
+            if (pageInfoEl) {
+                pageInfoEl.textContent = `Showing ${showingStart} to ${showingEnd} of ${totalRows} entries`;
+            }
+            
+            // Update pagination buttons
+            updatePagination();
+        }
+
+        function updatePagination() {
+            const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(filteredRows.length / rowsPerPage);
+            const paginationEl = document.getElementById('pagination');
+            paginationEl.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">
+                <i class="bi bi-chevron-left"></i>
+            </a>`;
+            paginationEl.appendChild(prevLi);
+            
+            // Page numbers
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+            
+            if (endPage - startPage < maxPagesToShow - 1) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            
+            // First page
+            if (startPage > 1) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(1); return false;">1</a>`;
+                paginationEl.appendChild(li);
+                
+                if (startPage > 2) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<a class="page-link">...</a>';
+                    paginationEl.appendChild(dots);
+                }
+            }
+            
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>`;
+                paginationEl.appendChild(li);
+            }
+            
+            // Last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<a class="page-link">...</a>';
+                    paginationEl.appendChild(dots);
+                }
+                
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${totalPages}); return false;">${totalPages}</a>`;
+                paginationEl.appendChild(li);
+            }
+            
+            // Next button
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">
+                <i class="bi bi-chevron-right"></i>
+            </a>`;
+            paginationEl.appendChild(nextLi);
+        }
+
+        function changePage(page) {
+            const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(filteredRows.length / rowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            displayPage(currentPage);
+            
+            // Smooth scroll to table
+            document.querySelector('.modern-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Delete confirmation
         function confirmDelete(id, name) {
             document.getElementById('typeName').textContent = name;
             var form = document.getElementById('deleteForm');

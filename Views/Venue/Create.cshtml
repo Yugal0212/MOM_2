@@ -1,4 +1,4 @@
-@model Venue
+@model MeetingVenue
 
 @{
     ViewData["Title"] = "Create Meeting Venue";
@@ -30,63 +30,9 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="mb-3">
-                            <label asp-for="Name" class="form-label">Venue Name <span class="text-danger">*</span></label>
-                            <input asp-for="Name" class="form-control" placeholder="e.g., Conference Room A" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="VenueType" class="form-label">Venue Type <span class="text-danger">*</span></label>
-                                <select asp-for="VenueType" class="form-select">
-                                    <option value="Physical">Physical</option>
-                                    <option value="Virtual">Virtual</option>
-                                </select>
-                                <span asp-validation-for="VenueType" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Capacity" class="form-label">Capacity</label>
-                                <input asp-for="Capacity" class="form-control" type="number" min="1" placeholder="20" />
-                                <span asp-validation-for="Capacity" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Location" class="form-label">Location/Address <span class="text-danger">*</span></label>
-                            <input asp-for="Location" class="form-control" placeholder="2nd Floor, Building A" />
-                            <span asp-validation-for="Location" class="text-danger"></span>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Building" class="form-label">Building</label>
-                                <input asp-for="Building" class="form-control" placeholder="Building A" />
-                                <span asp-validation-for="Building" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="RoomNumber" class="form-label">Room Number</label>
-                                <input asp-for="RoomNumber" class="form-control" placeholder="201" />
-                                <span asp-validation-for="RoomNumber" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="MeetingLink" class="form-label">Meeting Link (for Virtual)</label>
-                            <input asp-for="MeetingLink" class="form-control" type="url" placeholder="https://meet.company.com/room1" />
-                            <span asp-validation-for="MeetingLink" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Equipment" class="form-label">Equipment Available</label>
-                            <textarea asp-for="Equipment" class="form-control" rows="2" placeholder="Projector, Whiteboard, Conference Phone..."></textarea>
-                            <span asp-validation-for="Equipment" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
-                                <label asp-for="IsActive" class="form-check-label">Active</label>
-                            </div>
+                            <label asp-for="MeetingVenueName" class="form-label">Venue Name <span class="text-danger">*</span></label>
+                            <input asp-for="MeetingVenueName" class="form-control" placeholder="e.g., Conference Room A" />
+                            <span asp-validation-for="MeetingVenueName" class="text-danger"></span>
                         </div>
 
                         <div class="d-flex gap-2">

@@ -1,0 +1,204 @@
+@model MOM.Models.Meeting
+
+@{
+    ViewData["Title"] = "Edit Meeting";
+}
+
+<style>
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .edit-page .form-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        background: white;
+        overflow: hidden;
+    }
+
+    .edit-page .card-header-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .edit-page .form-section {
+        padding: 40px;
+    }
+
+    .edit-page .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .edit-page .form-control,
+    .edit-page .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .edit-page .form-control:focus,
+    .edit-page .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .edit-page .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 15px 50px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .edit-page .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+</style>
+
+<div class="edit-page">
+    <div class="pagetitle animate-fadeInUp">
+        <h1><i class="bi bi-pencil-square me-2"></i>Edit Meeting</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Meeting")">Meetings</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-card animate-fadeInUp">
+                    <div class="card-header-custom">
+                        <i class="bi bi-pencil-square" style="font-size: 3rem;"></i>
+                        <h2>Edit Meeting</h2>
+                        <p>Update meeting information</p>
+                    </div>
+
+                    <div class="form-section">
+                        <form asp-action="Edit" method="post">
+                            @Html.AntiForgeryToken()
+                            <input asp-for="MeetingId" type="hidden" />
+                            <input asp-for="Created" type="hidden" />
+                            <input asp-for="MeetingTypeName" type="hidden" id="meetingTypeName" /> <!-- Added hidden fields to persist names -->
+                            <input asp-for="VenueName" type="hidden" id="venueName" />
+                            <input asp-for="DepartmentName" type="hidden" id="departmentName" />
+
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label asp-for="MeetingDescription" class="form-label">Meeting Title / Description</label>
+                                    <input asp-for="MeetingDescription" class="form-control" />
+                                    <span asp-validation-for="MeetingDescription" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="Priority" class="form-label">Priority</label>
+                                    <select asp-for="Priority" class="form-select">
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Urgent">Urgent</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="MeetingTypeId" class="form-label">Meeting Type</label>
+                                    <select asp-for="MeetingTypeId" class="form-select" id="meetingTypeSelect">
+                                        @foreach (var type in (IEnumerable<SelectListItem>)ViewBag.MeetingTypes)
+                                        {
+                                            <option value="@type.Value" data-name="@type.Text" selected="@type.Selected">@type.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="MeetingVenueId" class="form-label">Venue</label>
+                                    <select asp-for="MeetingVenueId" class="form-select" id="venueSelect">
+                                        @foreach (var venue in (IEnumerable<SelectListItem>)ViewBag.Venues)
+                                        {
+                                            <option value="@venue.Value" data-name="@venue.Text" selected="@venue.Selected">@venue.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="MeetingDate" class="form-label">Date</label>
+                                    <input asp-for="MeetingDate" type="date" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="StartTime" class="form-label">Start Time</label>
+                                    <input asp-for="StartTime" type="time" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="EndTime" class="form-label">End Time</label>
+                                    <input asp-for="EndTime" type="time" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- Use DepartmentId for binding -->
+                                    <label asp-for="DepartmentId" class="form-label">Department</label>
+                                    <select asp-for="DepartmentId" class="form-select" id="departmentSelect">
+                                        @foreach (var dept in (IEnumerable<SelectListItem>)ViewBag.Departments)
+                                        {
+                                            <option value="@dept.Value" data-name="@dept.Text" selected="@dept.Selected">@dept.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Status" class="form-label">Status</label>
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="Scheduled">Scheduled</option>
+                                        <option value="InProgress">In Progress</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="MeetingDescription" class="form-label">Description / Agenda</label>
+                                    <textarea asp-for="MeetingDescription" class="form-control" rows="4"></textarea>
+                                </div>
+                                <div class="col-12 text-center mt-4">
+                                    <button type="submit" class="btn btn-submit me-3">
+                                        <i class="bi bi-check-circle me-2"></i>Update Meeting
+                                    </button>
+                                    <a href="@Url.Action("Index", "Meeting")" class="btn btn-secondary" style="padding: 15px 50px; border-radius: 12px; font-weight: 600;">
+                                        <i class="bi bi-x-circle me-2"></i>Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('meetingTypeSelect')?.addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
+            document.getElementById('meetingTypeName').value = selectedOption.getAttribute('data-name') || '';
+        });
+
+        document.getElementById('venueSelect')?.addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
+            document.getElementById('venueName').value = selectedOption.getAttribute('data-name') || '';
+        });
+        
+        document.getElementById('departmentSelect')?.addEventListener('change', function() {
+            var selectedOption = this.options[this.selectedIndex];
+            document.getElementById('departmentName').value = selectedOption.getAttribute('data-name') || '';
+        });
+    </script>
+}

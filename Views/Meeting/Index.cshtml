@@ -1,0 +1,868 @@
+@model System.Data.DataTable
+@using System.Linq
+
+@{
+    ViewData["Title"] = "All Meetings";
+}
+
+<style>
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes slideInRight {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @@keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .meeting-page { overflow-x: hidden; }
+    .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+    .animate-slideInRight { animation: slideInRight 0.5s ease-out forwards; }
+
+    /* Stat Cards */
+    .meeting-page .stat-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .meeting-page .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .meeting-page .stat-card-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .meeting-page .stat-card-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .meeting-page .stat-card-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .meeting-page .stat-card-danger {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .meeting-page .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    /* Modern Table */
+    .meeting-page .modern-table {
+        border: none;
+        border-radius: 16px;
+        overflow: visible;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        background: white;
+        width: 100%;
+        table-layout: auto;
+        display: table !important;
+    }
+
+    .meeting-page .modern-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: table-header-group !important;
+        visibility: visible !important;
+    }
+
+    .meeting-page .modern-table thead tr {
+        background: transparent !important;
+        border: none !important;
+        display: table-row !important;
+    }
+
+    .meeting-page .modern-table thead th {
+        border: none !important;
+        padding: 16px 14px !important;
+        font-weight: 600 !important;
+        color: #ffffff !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        text-align: left;
+        background: transparent !important;
+        display: table-cell !important;
+    }
+
+    .meeting-page .modern-table thead th:first-child {
+        border-top-left-radius: 12px !important;
+    }
+
+    .meeting-page .modern-table thead th:last-child {
+        border-top-right-radius: 12px !important;
+    }
+
+    .meeting-page .modern-table tbody {
+        display: table-row-group !important;
+        visibility: visible !important;
+    }
+
+    .meeting-page .modern-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f0f0 !important;
+        display: table-row !important;
+    }
+
+    .meeting-page .modern-table tbody td {
+        padding: 16px 14px !important;
+        vertical-align: middle !important;
+        border: none !important;
+        font-size: 0.85rem;
+        text-align: left;
+        background: #ffffff !important;
+        display: table-cell !important;
+    }
+
+    .meeting-page .modern-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: translateX(5px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .meeting-page .table-responsive {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+        display: block;
+        width: 100%;
+    }
+
+    /* Badges */
+    .meeting-page .badge-modern {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .meeting-page .badge-modern:hover {
+        transform: scale(1.08);
+    }
+
+    .meeting-page .status-scheduled {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .meeting-page .status-inprogress {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .meeting-page .status-completed {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .meeting-page .status-cancelled {
+        background: linear-gradient(135deg, #636363 0%, #a2ab58 100%);
+        color: white;
+    }
+
+    .meeting-page .priority-low {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .meeting-page .priority-medium {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .meeting-page .priority-high {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        color: white;
+    }
+
+    .meeting-page .priority-urgent {
+        background: linear-gradient(135deg, #f5576c 0%, #fa709a 100%);
+        color: white;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Action Buttons */
+    .meeting-page .btn-action {
+        transition: all 0.3s ease;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    .meeting-page .btn-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Search and Controls */
+    .meeting-page .search-wrapper {
+        position: relative;
+    }
+
+    .meeting-page .search-wrapper i.bi-search {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 1rem;
+    }
+
+    .meeting-page .search-box {
+        padding-left: 45px;
+        padding-right: 45px;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        height: 45px;
+        transition: all 0.3s ease;
+    }
+
+    .meeting-page .search-box:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .meeting-page .clear-search {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        display: none;
+        transition: all 0.3s ease;
+    }
+
+    .meeting-page .clear-search.active {
+        display: block;
+    }
+
+    .meeting-page .clear-search:hover {
+        color: #667eea;
+    }
+
+    .meeting-page .filter-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .meeting-page .filter-tab {
+        padding: 10px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+
+    .meeting-page .filter-tab:hover,
+    .meeting-page .filter-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .meeting-page .btn-schedule {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 14px 30px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .meeting-page .btn-schedule:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .meeting-page .pagination {
+        margin: 0;
+    }
+
+    .meeting-page .pagination .page-link {
+        border: none;
+        border-radius: 8px;
+        margin: 0 3px;
+        color: #667eea;
+        font-weight: 600;
+        padding: 8px 14px;
+        transition: all 0.3s ease;
+    }
+
+    .meeting-page .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .meeting-page .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .meeting-page .card-modern {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .meeting-page .card-modern:hover {
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .meeting-page .meeting-time {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .meeting-page .meeting-date {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        padding: 8px 14px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    .meeting-page .rows-per-page select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px 35px 8px 15px;
+        font-weight: 600;
+        color: #667eea;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+    }
+
+    .meeting-page .rows-per-page select:hover {
+        border-color: #667eea;
+        background-color: rgba(102, 126, 234, 0.02);
+    }
+
+    @@media (max-width: 768px) {
+        .meeting-page .modern-table thead th {
+            font-size: 0.7rem;
+            padding: 10px 8px;
+        }
+
+        .meeting-page .modern-table tbody td {
+            font-size: 0.75rem;
+            padding: 12px 8px;
+        }
+
+        .meeting-page .btn-schedule {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .meeting-page .filter-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+</style>
+
+<div class="meeting-page">
+    <div class="pagetitle animate-fadeInUp">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="bi bi-calendar-event me-2"></i>All Meetings</h1>
+                <nav>
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Meetings</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="@Url.Action("Schedule", "Meeting")" class="btn btn-schedule">
+                <i class="bi bi-calendar-plus"></i>
+                <span>Schedule New Meeting</span>
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show animate-fadeInUp" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <section class="section">
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-lg-3 col-md-6 animate-fadeInUp" style="animation-delay: 0.1s;">
+                <div class="stat-card stat-card-primary text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75 small">Total Meetings</p>
+                            <h2 class="mb-0 fw-bold display-6">@Model.Rows.Count</h2>
+                            <small class="opacity-90"><i class="bi bi-calendar-event"></i> All time</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="bi bi-calendar-week fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 animate-fadeInUp" style="animation-delay: 0.2s;">
+                <div class="stat-card stat-card-success text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75 small">Scheduled</p>
+                            <h2 class="mb-0 fw-bold display-6">@(Model.AsEnumerable().Count(m => Convert.ToDateTime(m["MeetingDate"]) > DateTime.Now))</h2>
+                            <small class="opacity-90"><i class="bi bi-clock"></i> Upcoming</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="bi bi-calendar-check fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 animate-fadeInUp" style="animation-delay: 0.3s;">
+                <div class="stat-card stat-card-warning text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75 small">In Progress</p>
+                            <h2 class="mb-0 fw-bold display-6">0</h2>
+                            <small class="opacity-90"><i class="bi bi-play-circle"></i> Live now</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="bi bi-broadcast fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 animate-fadeInUp" style="animation-delay: 0.4s;">
+                <div class="stat-card stat-card-danger text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75 small">Completed</p>
+                            <h2 class="mb-0 fw-bold display-6">@(Model.AsEnumerable().Count(m => Convert.ToDateTime(m["MeetingDate"]) <= DateTime.Now))</h2>
+                            <small class="opacity-90"><i class="bi bi-check-all"></i> Finished</small>
+                        </div>
+                        <div class="icon-circle">
+                            <i class="bi bi-check-circle fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filters Section -->
+        <div class="card card-modern mb-4 animate-fadeInUp" style="animation-delay: 0.4s;">
+             <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                <h6 class="card-title text-white mb-0 d-flex align-items-center">
+                    <i class="bi bi-funnel-fill me-2"></i>Search & Filters
+                </h6>
+            </div>
+            <div class="card-body p-4 bg-white" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                <form method="get" action="@Url.Action("Index", "Meeting")">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Meeting Type</label>
+                            <select name="meetingTypeId" class="form-select border-2" style="border-radius: 10px;">
+                                <option value="">All Types</option>
+                                @if(ViewBag.MeetingTypes != null) {
+                                    foreach(var type in (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.MeetingTypes) {
+                                        var isSelected = ViewBag.CurrentMeetingTypeId != null && ViewBag.CurrentMeetingTypeId.ToString() == type.Value ? "selected" : "";
+                                        <option value="@type.Value" selected="@isSelected">@type.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Department</label>
+                            <select name="departmentId" class="form-select border-2" style="border-radius: 10px;">
+                                <option value="">All Departments</option>
+                                @if(ViewBag.Departments != null) {
+                                    foreach(var dept in (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Departments) {
+                                        var isSelected = ViewBag.CurrentDepartmentId != null && ViewBag.CurrentDepartmentId.ToString() == dept.Value ? "selected" : "";
+                                        <option value="@dept.Value" selected="@isSelected">@dept.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Venue</label>
+                            <select name="venueId" class="form-select border-2" style="border-radius: 10px;">
+                                <option value="">All Venues</option>
+                                @if(ViewBag.Venues != null) {
+                                    foreach(var venue in (Microsoft.AspNetCore.Mvc.Rendering.SelectList)ViewBag.Venues) {
+                                        var isSelected = ViewBag.CurrentVenueId != null && ViewBag.CurrentVenueId.ToString() == venue.Value ? "selected" : "";
+                                        <option value="@venue.Value" selected="@isSelected">@venue.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                         <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Search</label>
+                            <div class="input-group">
+                                <input type="text" name="searchTerm" class="form-control border-2" placeholder="Search meetings..." value="@ViewBag.CurrentSearch" style="border-radius: 10px 0 0 10px; border-right: none;">
+                                <span class="input-group-text bg-white border-2" style="border-radius: 0 10px 10px 0; border-left: none;"><i class="bi bi-search text-muted"></i></span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">Start Date</label>
+                            <input type="date" name="startDate" class="form-control border-2" value="@ViewBag.CurrentStartDate" style="border-radius: 10px;">
+                        </div>
+                         <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-muted">End Date</label>
+                            <input type="date" name="endDate" class="form-control border-2" value="@ViewBag.CurrentEndDate" style="border-radius: 10px;">
+                        </div>
+                        
+                        <div class="col-md-6 d-flex align-items-end gap-2">
+                             <button type="submit" class="btn text-white fw-semibold px-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; border:none; padding: 10px;">
+                                <i class="bi bi-funnel me-2"></i>Apply Filters
+                            </button>
+                            <a href="@Url.Action("Index", "Meeting")" class="btn btn-light text-muted fw-semibold px-4" style="border-radius: 10px; padding: 10px;">
+                                <i class="bi bi-arrow-counterclockwise me-2"></i>Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Table Card -->
+        <div class="card card-modern animate-fadeInUp" style="animation-delay: 0.5s;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="rows-per-page">
+                        <label class="me-2 fw-semibold text-muted">Show:</label>
+                        <select id="rowsPerPage">
+                            <option value="5">5 rows</option>
+                            <option value="10" selected>10 rows</option>
+                            <option value="25">25 rows</option>
+                            <option value="50">50 rows</option>
+                            <option value="-1">All</option>
+                        </select>
+                    </div>
+                </div>
+
+                @if (Model.Rows.Count == 0)
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x" style="font-size: 4rem; color: #667eea; opacity: 0.4;"></i>
+                        <h4 class="text-secondary mt-3 mb-2">No Meetings Found</h4>
+                        <p class="text-muted">Start by scheduling your first meeting</p>
+                        <a href="@Url.Action("Schedule")" class="btn btn-schedule mt-3">
+                            <i class="bi bi-calendar-plus"></i>
+                            Schedule Meeting
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover modern-table mb-0" id="meetingsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col"><i class="bi bi-hash me-1"></i> ID</th>
+                                    <th scope="col"><i class="bi bi-card-heading me-1"></i> Title</th>
+                                    <th scope="col"><i class="bi bi-geo-alt me-1"></i> Venue</th>
+                                    <th scope="col"><i class="bi bi-calendar3 me-1"></i> Date & Time</th>
+                                    <th scope="col"><i class="bi bi-flag me-1"></i> Priority</th>
+                                    <th scope="col"><i class="bi bi-toggle-on me-1"></i> Status</th>
+                                    <th scope="col" class="text-center"><i class="bi bi-gear me-1"></i> Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                @{
+                                    var index = 0;
+                                }
+                                @foreach (System.Data.DataRow row in Model.Rows)
+                                {
+                                    index++;
+                                    var meetingDate = Convert.ToDateTime(row["MeetingDate"]);
+                                    var status = meetingDate > DateTime.Now ? "Scheduled" : "Completed";
+                                    if (row["IsCancelled"] != DBNull.Value && Convert.ToBoolean(row["IsCancelled"]))
+                                    {
+                                        status = "Cancelled";
+                                    }
+                                    var statusClass = status.ToLower().Replace(" ", "");
+                                    
+                                    <tr class="animate-slideInRight" style="animation-delay: @(0.6 + (index * 0.05))s;" data-status="@status">
+                                        <td>
+                                            <span class="badge-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                                @row["MeetingId"]
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <strong class="text-dark">@(row["MeetingDescription"] != DBNull.Value && !string.IsNullOrEmpty(row["MeetingDescription"].ToString()) ? row["MeetingDescription"] : $"Meeting #{row["MeetingId"]}")</strong>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-tag-fill me-1" style="font-size: 0.75rem;"></i>@(row["MeetingTypeName"] != DBNull.Value ? row["MeetingTypeName"] : "")
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-geo-alt-fill text-danger"></i>
+                                                <span>@(row["MeetingVenueName"] != DBNull.Value ? row["MeetingVenueName"] : "")</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="meeting-date mb-1">
+                                                <i class="bi bi-calendar3"></i>
+                                                <span>@meetingDate.ToString("MMM dd, yyyy")</span>
+                                            </div>
+                                            <div class="meeting-time">
+                                                <i class="bi bi-clock"></i>
+                                                <span>@meetingDate.ToString("hh:mm tt")</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge-modern priority-medium">
+                                                <i class="bi bi-flag-fill"></i> Medium
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge-modern status-@statusClass">
+                                                @if (status == "Scheduled")
+                                                {
+                                                    <i class="bi bi-calendar-check-fill"></i>
+                                                }
+                                                else if (status == "Completed")
+                                                {
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                }
+                                                @status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <a href="@Url.Action("Details", new { id = row["MeetingId"] })" 
+                                                   class="btn btn-sm btn-action" 
+                                                   style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;"
+                                                   title="View Details">
+                                                    <i class="bi bi-eye-fill"></i>
+                                                </a>
+                                                <a href="@Url.Action("Edit", new { id = row["MeetingId"] })" 
+                                                   class="btn btn-sm btn-action" 
+                                                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;"
+                                                   title="Edit">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </a>
+                                                <a href="@Url.Action("Manage", "Attendance", new { meetingId = row["MeetingId"] })" 
+                                                   class="btn btn-sm btn-action" 
+                                                   style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;"
+                                                   title="Attendance">
+                                                    <i class="bi bi-clipboard-check-fill"></i>
+                                                </a>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-action" 
+                                                        style="background: linear-gradient(135deg, #f5576c 0%, #fa709a 100%); color: white;"
+                                                        onclick="confirmDelete(@row["MeetingId"], '@row["MeetingDescription"]')"
+                                                        title="Delete">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3" style="border-top: 1px solid #f0f0f0;">
+                        <div>
+                            <span class="text-muted small fw-semibold" id="pageInfo"></span>
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0" id="pagination"></ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Are you sure you want to delete <strong><span id="meetingTitle"></span></strong>?</p>
+                <small class="text-muted">This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Delete Meeting</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let allRows = [];
+        let filteredRows = [];
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('tableBody');
+            if (tableBody) {
+                allRows = Array.from(tableBody.getElementsByTagName('tr'));
+                // Filter functionality is now handled server-side, so filteredRows is always allRows on load
+                filteredRows = allRows;
+                
+                // Rows per page
+                document.getElementById('rowsPerPage')?.addEventListener('change', function() {
+                    rowsPerPage = parseInt(this.value);
+                    currentPage = 1;
+                    displayPage(currentPage);
+                });
+                
+                displayPage(1);
+            }
+        });
+
+        // Removed client-side filterAndSearch function as filtering is done server-side
+
+        function displayPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = rowsPerPage === -1 ? filteredRows.length : start + rowsPerPage;
+            
+            allRows.forEach(row => row.style.display = 'none');
+            filteredRows.slice(start, end).forEach(row => row.style.display = '');
+            
+            updatePagination();
+            updatePageInfo(start, end);
+        }
+
+        function updatePagination() {
+            const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(filteredRows.length / rowsPerPage);
+            const paginationEl = document.getElementById('pagination');
+            
+            if (!paginationEl || totalPages <= 1) {
+                paginationEl.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // Previous button
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>`;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+                            </li>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            // Next button
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>`;
+            
+            paginationEl.innerHTML = html;
+        }
+
+        function updatePageInfo(start, end) {
+            const pageInfo = document.getElementById('pageInfo');
+            if (pageInfo) {
+                const showing = Math.min(end, filteredRows.length);
+                pageInfo.textContent = `Showing ${start + 1} to ${showing} of ${filteredRows.length} entries`;
+            }
+        }
+
+        function changePage(page) {
+            const totalPages = rowsPerPage === -1 ? 1 : Math.ceil(filteredRows.length / rowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            displayPage(page);
+        }
+
+        function confirmDelete(id, title) {
+            document.getElementById('meetingTitle').textContent = title;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", "Meeting")/' + id;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+}
